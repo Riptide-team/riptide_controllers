@@ -1,0 +1,6 @@
+riptide_echosounder:
+  echosounder_name: {
+    type: string,
+    description: "Specifies the name of the echosounder state interface",
+    read_only: true
+  }

@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>riptide_controllers</name>
+  <version>0.0.1</version>
+  <description>Riptide controllers</description>
+  <maintainer email="quentin.brateau@ensta-bretagne.org">Quentin Brateau</maintainer>
+  <license>GNU General Public License version 3</license>
+
+  <depend>controller_interface</depend>
+  <depend>generate_parameter_library</depend>
+  <depend>hardware_interface</depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>realtime_tools</depend>
+  
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  
+  <build_depend>pluginlib</build_depend>
+  <build_depend>eigen</build_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

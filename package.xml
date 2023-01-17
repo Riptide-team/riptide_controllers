@@ -7,6 +7,7 @@
   <maintainer email="quentin.brateau@ensta-bretagne.org">Quentin Brateau</maintainer>
   <license>GNU General Public License version 3</license>
 
+  <depend>controller_manager</depend>
   <depend>controller_interface</depend>
   <depend>generate_parameter_library</depend>
   <depend>hardware_interface</depend>

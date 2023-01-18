@@ -77,6 +77,7 @@ namespace riptide_controllers {
     }
 
     controller_interface::CallbackReturn RiptideActuatorsTester::on_activate(const rclcpp_lifecycle::State & /*previous_state*/) {
+
         return CallbackReturn::SUCCESS;
     }
 
@@ -99,6 +100,8 @@ namespace riptide_controllers {
             float u = M_PI_2 * std::sin(period_ * time_ + 2 * M_PI / 3 * (i - 1)) * (1 - std::exp(- time_ / damping_));
             command_interfaces_[i].set_value(u);
         }
+
+        RCLCPP_INFO(rclcpp::Logger("ActuatorsTester"), "[%f]s %f %f %f %f", time_, command_interfaces_[0], command_interfaces_[1], command_interfaces_[2], command_interfaces_[3]);
 
         return controller_interface::return_type::OK;
     }

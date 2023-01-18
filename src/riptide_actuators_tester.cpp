@@ -61,11 +61,12 @@ namespace riptide_controllers {
 
     controller_interface::InterfaceConfiguration RiptideActuatorsTester::command_interface_configuration() const {
         controller_interface::InterfaceConfiguration command_interfaces_config;
+        std::string prefix = std::string(get_node()->get_namespace()).substr(1);
         command_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
-        command_interfaces_config.names.push_back(std::string(get_node()->get_namespace()) + "_" + params_.thruster_joint + "/position");
-        command_interfaces_config.names.push_back(std::string(get_node()->get_namespace()) + "_" + params_.d_joint + "/position");
-        command_interfaces_config.names.push_back(std::string(get_node()->get_namespace()) + "_" + params_.p_joint + "/position");
-        command_interfaces_config.names.push_back(std::string(get_node()->get_namespace()) + "_" + params_.s_joint + "/position");
+        command_interfaces_config.names.push_back(prefix + "_" + params_.thruster_joint + "/position");
+        command_interfaces_config.names.push_back(prefix + "_" + params_.d_joint + "/position");
+        command_interfaces_config.names.push_back(prefix + "_" + params_.p_joint + "/position");
+        command_interfaces_config.names.push_back(prefix + "_" + params_.s_joint + "/position");
         return command_interfaces_config;
     }
 

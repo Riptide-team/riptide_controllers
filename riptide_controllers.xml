@@ -14,7 +14,7 @@
             Riptide echosounder controller
         </description>
     </class>
-    <class name="riptide_controllers/RiptideActuatorsTester" type="riptide_controllers::RiptideActuatrosTester"  base_class_type="controller_interface::ControllerInterface">
+    <class name="riptide_controllers/RiptideActuatorsTester" type="riptide_controllers::RiptideActuatorsTester"  base_class_type="controller_interface::ControllerInterface">
         <description>
             Riptide actuator tester
         </description>

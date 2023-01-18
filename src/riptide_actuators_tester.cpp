@@ -27,6 +27,9 @@ namespace riptide_controllers {
             get_node()->get_logger(), "Exception thrown during init stage with message: %s \n", e.what());
             return CallbackReturn::ERROR;
         }
+
+        RCLCPP_INFO(get_node()->get_logger(), "Command interface: %s", (std::string(get_node()->get_namespace()) + "_" + params_.s_joint + "/position").c_str());
+
         return CallbackReturn::SUCCESS;
     }
 

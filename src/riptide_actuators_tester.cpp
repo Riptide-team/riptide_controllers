@@ -65,6 +65,8 @@ namespace riptide_controllers {
         command_interfaces_config.names.push_back(std::string(get_node()->get_namespace()) + "_" + params_.d_joint + "/position");
         command_interfaces_config.names.push_back(std::string(get_node()->get_namespace()) + "_" + params_.p_joint + "/position");
         command_interfaces_config.names.push_back(std::string(get_node()->get_namespace()) + "_" + params_.s_joint + "/position");
+
+        RCLCPP_INFO(get_logger()->get_namespace(), "Command interface: %s", (std::string(get_node()->get_namespace()) + "_" + params_.s_joint + "/position").c_str);
         return command_interfaces_config;
     }
 

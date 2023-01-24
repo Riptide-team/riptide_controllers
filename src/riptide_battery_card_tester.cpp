@@ -38,7 +38,9 @@ namespace riptide_controllers {
             return CallbackReturn::ERROR;
         }
 
-        RCLCPP_DEBUG(get_node()->get_logger(), "configure successful");
+        RCLCPP_INFO(get_node()->get_logger(), "Params sensor name %s", params_.sensor_name.c_str());
+
+        RCLCPP_INFO(get_node()->get_logger(), "configure successful");
         return CallbackReturn::SUCCESS;
     }
 

@@ -51,6 +51,7 @@ namespace riptide_controllers {
     controller_interface::InterfaceConfiguration RiptideBatteryCardTester::state_interface_configuration() const {
         controller_interface::InterfaceConfiguration state_interfaces_config;
         std::string prefix = std::string(get_node()->get_namespace()).substr(1);
+        RCLCPP_INFO(get_node()->get_logger(), "Claiming %s %s", (prefix + "_" + params_.sensor_name + "/tension").c_str(), (prefix + "_" + params_.sensor_name + "/current").c_str());
         state_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
         state_interfaces_config.names.push_back(prefix + "_" + params_.sensor_name + "/tension");
         state_interfaces_config.names.push_back(prefix + "_" + params_.sensor_name + "/current");

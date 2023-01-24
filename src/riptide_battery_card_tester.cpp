@@ -40,11 +40,12 @@ namespace riptide_controllers {
 
         RCLCPP_INFO(get_node()->get_logger(), "Params sensor name %s", params_.sensor_name.c_str());
 
-        RCLCPP_INFO(get_node()->get_logger(), "configure successful");
+        RCLCPP_INFO(get_node()->get_logger(), "Configure successful");
         return CallbackReturn::SUCCESS;
     }
 
     controller_interface::InterfaceConfiguration RiptideBatteryCardTester::command_interface_configuration() const {
+        RCLCPP_INFO(get_node()->get_logger(), "Command Interface Configuration");
         controller_interface::InterfaceConfiguration command_interfaces_config;
         command_interfaces_config.type = controller_interface::interface_configuration_type::NONE;
         return command_interfaces_config;

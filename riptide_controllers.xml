@@ -24,4 +24,9 @@
             Riptide actuator tester
         </description>
     </class>
+    <class name="riptide_controllers/RiptideIMUTester" type="riptide_controllers::RiptideIMUTester"  base_class_type="controller_interface::ControllerInterface">
+        <description>
+            Riptide imu tester
+        </description>
+    </class>
   </library>

@@ -67,7 +67,7 @@ namespace riptide_controllers {
         return CallbackReturn::SUCCESS;
     }
 
-    controller_interface::return_type RiptideEchosounderTester::update(const rclcpp::Time & time, const rclcpp::Duration & /*period*/) {
+    controller_interface::return_type RiptideEchosounderTester::update(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) {
         RCLCPP_INFO(get_node()->get_logger(), "d=%fm", state_interfaces_[0].get_value());
         return controller_interface::return_type::OK;
     }

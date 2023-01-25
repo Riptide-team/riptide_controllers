@@ -29,4 +29,9 @@
             Riptide imu tester
         </description>
     </class>
+    <class name="riptide_controllers/RiptidePressureTester" type="riptide_controllers::RiptidePressureTester"  base_class_type="controller_interface::ControllerInterface">
+        <description>
+            Riptide pressure sensor tester
+        </description>
+    </class>
   </library>

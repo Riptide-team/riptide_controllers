@@ -34,7 +34,7 @@ generate_parameter_library(riptide_battery_card_tester_parameters src/riptide_ba
 generate_parameter_library(riptide_imu_tester_parameters src/riptide_imu_tester.yaml)
 generate_parameter_library(riptide_pressure_tester_parameters src/riptide_pressure_tester.yaml)
 
-add_library(${PROJECT_NAME} SHARED src/state_estimator.cpp src/riptide_controller.cpp src/riptide_echosounder.cpp src/riptide_actuators_tester.cpp src/riptide_battery_card_tester.cpp  src/riptide_imu_tester.cpp src/riptide_pressure_tester)
+add_library(${PROJECT_NAME} SHARED src/state_estimator.cpp src/riptide_controller.cpp src/riptide_echosounder.cpp src/riptide_actuators_tester.cpp src/riptide_battery_card_tester.cpp  src/riptide_imu_tester.cpp src/riptide_pressure_tester.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 target_link_libraries(${PROJECT_NAME} state_estimator_parameters riptide_controller_parameters riptide_echosounder_parameters riptide_actuators_tester_parameters riptide_battery_card_tester_parameters riptide_imu_tester_parameters riptide_pressure_tester_parameters Eigen3::Eigen)
 ament_target_dependencies(${PROJECT_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})

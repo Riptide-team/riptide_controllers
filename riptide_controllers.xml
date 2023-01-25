@@ -34,4 +34,9 @@
             Riptide pressure sensor tester
         </description>
     </class>
+    <class name="riptide_controllers/RiptideEchosounderTester" type="riptide_controllers::RiptideEchosounderTester"  base_class_type="controller_interface::ControllerInterface">
+        <description>
+            Riptide echosounder tester
+        </description>
+    </class>
   </library>

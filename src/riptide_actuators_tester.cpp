@@ -101,7 +101,7 @@ namespace riptide_controllers {
             command_interfaces_[i].set_value(u);
         }
 
-        RCLCPP_DEBUG(get_node()->get_logger(), "[%f]s %f %f %f %f", time_, command_interfaces_[0].get_value(), command_interfaces_[1].get_value(), command_interfaces_[2].get_value(), command_interfaces_[3].get_value());
+        RCLCPP_DEBUG(get_node()->get_logger(), "Actuators %f %f %f %f", command_interfaces_[0].get_value(), command_interfaces_[1].get_value(), command_interfaces_[2].get_value(), command_interfaces_[3].get_value());
 
         return controller_interface::return_type::OK;
     }

@@ -1,4 +1,4 @@
-#include "riptide_controllers/riptide_actuators_tester.hpp"
+#include "riptide_controllers/testers/riptide_actuators_tester.hpp"
 #include "riptide_actuators_tester_parameters.hpp"
 #include "controller_interface/controller_interface.hpp"
 
@@ -12,7 +12,7 @@
 #include <eigen3/Eigen/Dense>
 #include <cmath>
 
-namespace riptide_controllers {
+namespace riptide_testers {
 
     RiptideActuatorsTester::RiptideActuatorsTester() :
         controller_interface::ControllerInterface() {}
@@ -105,8 +105,8 @@ namespace riptide_controllers {
 
         return controller_interface::return_type::OK;
     }
-} // riptide_controllers
+} // riptide_testers
 
 #include "pluginlib/class_list_macros.hpp"
 
-PLUGINLIB_EXPORT_CLASS(riptide_controllers::RiptideActuatorsTester, controller_interface::ControllerInterface)
+PLUGINLIB_EXPORT_CLASS(riptide_testers::RiptideActuatorsTester, controller_interface::ControllerInterface)

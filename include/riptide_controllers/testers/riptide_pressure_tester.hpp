@@ -4,7 +4,7 @@
 #include "riptide_pressure_tester_parameters.hpp"
 #include <string>
 
-namespace riptide_controllers {
+namespace riptide_testers {
 
     class RiptidePressureTester : public controller_interface::ControllerInterface {
         public:
@@ -30,4 +30,4 @@ namespace riptide_controllers {
             riptide_pressure_tester::Params params_;
     };
 
-} // riptide_controllers
+} // riptide_testers

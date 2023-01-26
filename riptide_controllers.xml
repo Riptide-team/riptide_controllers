@@ -14,29 +14,4 @@
             Riptide echosounder controller
         </description>
     </class>
-    <class name="riptide_controllers/RiptideActuatorsTester" type="riptide_controllers::RiptideActuatorsTester"  base_class_type="controller_interface::ControllerInterface">
-        <description>
-            Riptide actuator tester
-        </description>
-    </class>
-    <class name="riptide_controllers/RiptideBatteryCardTester" type="riptide_controllers::RiptideBatteryCardTester"  base_class_type="controller_interface::ControllerInterface">
-        <description>
-            Riptide actuator tester
-        </description>
-    </class>
-    <class name="riptide_controllers/RiptideIMUTester" type="riptide_controllers::RiptideIMUTester"  base_class_type="controller_interface::ControllerInterface">
-        <description>
-            Riptide imu tester
-        </description>
-    </class>
-    <class name="riptide_controllers/RiptidePressureTester" type="riptide_controllers::RiptidePressureTester"  base_class_type="controller_interface::ControllerInterface">
-        <description>
-            Riptide pressure sensor tester
-        </description>
-    </class>
-    <class name="riptide_controllers/RiptideEchosounderTester" type="riptide_controllers::RiptideEchosounderTester"  base_class_type="controller_interface::ControllerInterface">
-        <description>
-            Riptide echosounder tester
-        </description>
-    </class>
-  </library>
+</library>

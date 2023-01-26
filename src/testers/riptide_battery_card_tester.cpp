@@ -1,4 +1,4 @@
-#include "riptide_controllers/riptide_battery_card_tester.hpp"
+#include "riptide_controllers/testers/riptide_battery_card_tester.hpp"
 #include "riptide_battery_card_tester_parameters.hpp"
 #include "controller_interface/controller_interface.hpp"
 
@@ -12,7 +12,7 @@
 #include <eigen3/Eigen/Dense>
 #include <cmath>
 
-namespace riptide_controllers {
+namespace riptide_testers {
 
     RiptideBatteryCardTester::RiptideBatteryCardTester() :
         controller_interface::ControllerInterface() {}
@@ -73,8 +73,8 @@ namespace riptide_controllers {
         RCLCPP_INFO(get_node()->get_logger(), "[%f]s u=%fV, i=%fA", time.seconds(), state_interfaces_[0].get_value(), state_interfaces_[1].get_value());
         return controller_interface::return_type::OK;
     }
-} // riptide_controllers
+} // riptide_testers
 
 #include "pluginlib/class_list_macros.hpp"
 
-PLUGINLIB_EXPORT_CLASS(riptide_controllers::RiptideBatteryCardTester, controller_interface::ControllerInterface)
+PLUGINLIB_EXPORT_CLASS(riptide_testers::RiptideBatteryCardTester, controller_interface::ControllerInterface)

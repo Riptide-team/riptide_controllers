@@ -51,7 +51,7 @@ ament_target_dependencies(riptide_testers ${THIS_PACKAGE_INCLUDE_DEPENDS})
 pluginlib_export_plugin_description_file(controller_interface riptide_testers.xml)
 install(
   TARGETS
-  riptide_tester
+  riptide_testers
   RUNTIME DESTINATION bin
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

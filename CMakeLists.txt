@@ -38,14 +38,14 @@ list(APPEND test_controllers
 )
 
 # Compile tester library
-add_library(riptide_tester ${test_controllers})
-target_include_directories(riptide_tester PRIVATE include)
+add_library(riptide_testers ${test_controllers})
+target_include_directories(riptide_testers PRIVATE include)
 foreach(filename ${test_controllers})
   get_filename_component(target_name ${filename} NAME_WE)
   generate_parameter_library(${target_name}_parameters src/testers/${target_name}.yaml)
-  target_link_libraries(riptide_tester ${target_name}_parameters)
+  target_link_libraries(riptide_testers ${target_name}_parameters)
 endforeach()
-ament_target_dependencies(riptide_tester ${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_target_dependencies(riptide_testers ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Install tester library
 pluginlib_export_plugin_description_file(controller_interface riptide_testers.xml)
@@ -93,6 +93,6 @@ endif()
 
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 ament_export_include_directories(include)
-ament_export_libraries(riptide_tester)
+ament_export_libraries(riptide_testers)
 ament_export_libraries(${PROJECT_NAME})
 ament_package()

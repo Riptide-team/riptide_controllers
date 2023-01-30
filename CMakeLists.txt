@@ -38,7 +38,7 @@ list(APPEND test_controllers
 )
 
 # Compile tester library
-add_library(riptide_testers ${test_controllers})
+add_library(riptide_testers SHARED ${test_controllers})
 target_include_directories(riptide_testers PRIVATE include)
 foreach(filename ${test_controllers})
   get_filename_component(target_name ${filename} NAME_WE)

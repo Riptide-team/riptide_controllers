@@ -32,8 +32,20 @@ namespace riptide_broadcasters {
         }
         
         // Publisher
-        pressure_publisher_ = get_node()->create_publisher<Msg>("~/pressure_status", rclcpp::SystemDefaultsQoS());
-        realtime_pressure_publisher_ = std::make_shared<realtime_tools::RealtimePublisher<Msg>>(pressure_publisher_);
+        try {
+            // register ft sensor data publisher
+            pressure_publisher_ = get_node()->create_publisher<Msg>("~/pressure_status", rclcpp::SystemDefaultsQoS());
+            realtime_pressure_publisher_ = std::make_shared<realtime_tools::RealtimePublisher<Msg>>(pressure_publisher_);
+        }
+        catch (const std::exception & e) {
+            RCLCPP_FATAL(get_node()->get_logger(), "Exception thrown during publisher creation at configure stage with message : %s", e.what());
+            return CallbackReturn::ERROR;
+        }
+
+        // Filling header of the message
+        realtime_pressure_publisher_->lock();
+        realtime_pressure_publisher_->msg_.header.frame_id = "base_link";
+        realtime_pressure_publisher_->unlock();
 
         RCLCPP_DEBUG(get_node()->get_logger(), "configure successful");
         return CallbackReturn::SUCCESS;
@@ -66,19 +78,15 @@ namespace riptide_broadcasters {
 
     controller_interface::return_type PressureBroadcaster::update(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) {
 
-        if (realtime_pressure_publisher_->trylock()) {
-            // Getting the message
-            auto pressure_message = realtime_pressure_publisher_->msg_;
-
+        if (realtime_pressure_publisher_ && realtime_pressure_publisher_->trylock()) {
             // Header
-            pressure_message.header.stamp = get_node()->now();
-            pressure_message.header.frame_id = "base_link";
+            realtime_pressure_publisher_->msg_.header.stamp = get_node()->now();
 
             // Data
-            pressure_message.pressure = state_interfaces_[0].get_value();
-            pressure_message.temperature = state_interfaces_[1].get_value();
-            pressure_message.depth = state_interfaces_[2].get_value();
-            pressure_message.altitude = state_interfaces_[3].get_value();
+            realtime_pressure_publisher_->msg_.pressure = state_interfaces_[0].get_value();
+            realtime_pressure_publisher_->msg_.temperature = state_interfaces_[1].get_value();
+            realtime_pressure_publisher_->msg_.depth = state_interfaces_[2].get_value();
+            realtime_pressure_publisher_->msg_.altitude = state_interfaces_[3].get_value();
             realtime_pressure_publisher_->unlockAndPublish();
         }
 

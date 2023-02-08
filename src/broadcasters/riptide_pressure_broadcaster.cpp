@@ -32,7 +32,7 @@ namespace riptide_broadcasters {
         }
         
         // Publisher
-        pressure_publisher_ = get_node()->create_publisher<Msg>("~/pressure", rclcpp::SystemDefaultsQoS());
+        pressure_publisher_ = get_node()->create_publisher<Msg>("~/pressure_status", rclcpp::SystemDefaultsQoS());
         realtime_pressure_publisher_ = std::make_shared<realtime_tools::RealtimePublisher<Msg>>(pressure_publisher_);
 
         RCLCPP_DEBUG(get_node()->get_logger(), "configure successful");

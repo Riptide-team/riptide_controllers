@@ -72,16 +72,18 @@ namespace riptide_controllers {
     controller_interface::InterfaceConfiguration DepthController::command_interface_configuration() const {
         controller_interface::InterfaceConfiguration command_interfaces_config;
         command_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
-        command_interfaces_config.names.push_back(params_.thruster_joint + "/position");
-        command_interfaces_config.names.push_back(params_.p_joint + "/position");
-        command_interfaces_config.names.push_back(params_.s_joint + "/position");
+        std::string prefix = std::string(get_node()->get_namespace()).substr(1);
+        command_interfaces_config.names.push_back(prefix + "_" + params_.thruster_joint + "/position");
+        command_interfaces_config.names.push_back(prefix + "_" + params_.p_joint + "/position");
+        command_interfaces_config.names.push_back(prefix + "_" + params_.s_joint + "/position");
         return command_interfaces_config;
     }
 
     controller_interface::InterfaceConfiguration DepthController::state_interface_configuration() const {
         controller_interface::InterfaceConfiguration state_interfaces_config;
         state_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
-        state_interfaces_config.names.push_back(params_.pressure_name + "/pressure");
+        std::string prefix = std::string(get_node()->get_namespace()).substr(1);
+        state_interfaces_config.names.push_back(prefix + "_" + params_.pressure_name + "/pressure");
         return state_interfaces_config;
     }
 

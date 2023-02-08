@@ -1,0 +1,7 @@
+<library path="riptide_broadcasters">
+    <class name="riptide_broadcasters/PressureBroadcaster" type="riptide_broadcasters::PressureBroadcaster"  base_class_type="controller_interface::ControllerInterface">
+        <description>
+            Riptide actuator tester
+        </description>
+    </class>
+</library>

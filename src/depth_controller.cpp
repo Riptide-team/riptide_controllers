@@ -59,7 +59,7 @@ namespace riptide_controllers {
 
         action_server_ = rclcpp_action::create_server<riptide_msgs::action::Depth>(
             get_node(),
-            "~/depth",
+            "depth",
             std::bind(&DepthController::handle_goal, this, std::placeholders::_1, std::placeholders::_2),
             std::bind(&DepthController::handle_cancel, this, std::placeholders::_1),
             std::bind(&DepthController::handle_accepted, this, std::placeholders::_1)

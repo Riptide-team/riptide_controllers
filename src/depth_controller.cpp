@@ -33,10 +33,6 @@ namespace riptide_controllers {
 
     controller_interface::CallbackReturn DepthController::on_configure(const rclcpp_lifecycle::State & /*previous_state*/) {
         params_ = param_listener_->get_params();
-        if (params_.d_joint.empty()) {
-            RCLCPP_ERROR(get_node()->get_logger(), "'d_joint' parameter has to be specified.");
-            return CallbackReturn::ERROR;
-        }
         if (params_.p_joint.empty()) {
             RCLCPP_ERROR(get_node()->get_logger(), "'p_joint' parameter has to be specified.");
             return CallbackReturn::ERROR;

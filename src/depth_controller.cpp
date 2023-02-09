@@ -97,24 +97,29 @@ namespace riptide_controllers {
 
     controller_interface::return_type DepthController::update(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) {
         std::lock_guard<std::mutex> lock_(depth_mutex_);
-        double error = requested_depth_ - state_interfaces_[0].get_value();
+        double error = 0;
 
-        // Check if the goal is canceled
-        if (goal_handle_->is_canceling()) {
-            requested_depth_ = state_interfaces_[0].get_value();
-            result_->depth = state_interfaces_[0].get_value();
-            goal_handle_->canceled(result_);
-            RCLCPP_INFO(get_node()->get_logger(), "Goal canceled");
-        }
-        // Check if the goal is validated
-        else if (std::abs(error) < 0.1) {
-            result_->depth = state_interfaces_[0].get_value();
-            goal_handle_->succeed(result_);
-        }
-        // Publish the feedback
-        else {
-            feedback_->error = state_interfaces_[0].get_value() - requested_depth_;
-            goal_handle_->publish_feedback(feedback_);
+        // Only if a goal has been provided
+        if (goal_handle_ != nullptr) {
+            error = requested_depth_ - state_interfaces_[0].get_value();
+
+            // Check if the goal is canceled
+            if (goal_handle_->is_canceling()) {
+                requested_depth_ = state_interfaces_[0].get_value();
+                result_->depth = state_interfaces_[0].get_value();
+                goal_handle_->canceled(result_);
+                RCLCPP_INFO(get_node()->get_logger(), "Goal canceled");
+            }
+            // Check if the goal is validated
+            else if (std::abs(error) < 0.1) {
+                result_->depth = state_interfaces_[0].get_value();
+                goal_handle_->succeed(result_);
+            }
+            // Publish the feedback
+            else {
+                feedback_->error = state_interfaces_[0].get_value() - requested_depth_;
+                goal_handle_->publish_feedback(feedback_);
+            }
         }
 
         double alpha = std::atan(error);

@@ -98,10 +98,12 @@ namespace riptide_controllers {
     controller_interface::return_type DepthController::update(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) {
         std::lock_guard<std::mutex> lock_(depth_mutex_);
         double error = 0;
+        double u0 = 0.;
 
         // Only if a goal has been provided
         if (goal_handle_ != nullptr) {
             error = requested_depth_ - state_interfaces_[0].get_value();
+            u0 = 1.;
 
             // Check if the goal is canceled
             if (goal_handle_->is_canceling()) {
@@ -125,7 +127,6 @@ namespace riptide_controllers {
         double alpha = std::atan(error);
 
         // double Kp = 1.;
-        double u0 = 1.;
         command_interfaces_[0].set_value(u0);
         command_interfaces_[1].set_value(alpha);
         command_interfaces_[2].set_value(alpha);

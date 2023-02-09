@@ -103,29 +103,33 @@ namespace riptide_controllers {
 
             // Check if the goal is canceled
             if (goal_handle_->is_canceling()) {
-                requested_depth_ = state_interfaces_[0].get_value();
                 result_->depth = state_interfaces_[0].get_value();
                 goal_handle_->canceled(result_);
                 RCLCPP_INFO(get_node()->get_logger(), "Goal canceled");
             }
             // Check if the goal is validated
-            else if (std::abs(error) < 0.1) {
+            else if (goal_handle_->is_executing() && std::abs(error) < 0.1) {
                 result_->depth = state_interfaces_[0].get_value();
                 goal_handle_->succeed(result_);
+                goal_handle_ = nullptr;
             }
             // Publish the feedback
             else {
-                feedback_->error = state_interfaces_[0].get_value() - requested_depth_;
+                feedback_->error = error;
                 goal_handle_->publish_feedback(feedback_);
+
+                // Command
+                // double Kp = 1.;
+                double alpha = std::atan(error);
+                command_interfaces_[0].set_value(u0);
+                command_interfaces_[1].set_value(alpha);
+                command_interfaces_[2].set_value(-alpha);
             }
         }
 
-        double alpha = std::atan(error);
-
-        // double Kp = 1.;
-        command_interfaces_[0].set_value(u0);
-        command_interfaces_[1].set_value(alpha);
-        command_interfaces_[2].set_value(-alpha);
+        command_interfaces_[0].set_value(0);
+        command_interfaces_[1].set_value(0);
+        command_interfaces_[2].set_value(0);
         
         return controller_interface::return_type::OK;
     }

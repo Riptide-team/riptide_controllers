@@ -129,7 +129,7 @@ namespace riptide_controllers {
         // double Kp = 1.;
         command_interfaces_[0].set_value(u0);
         command_interfaces_[1].set_value(alpha);
-        command_interfaces_[2].set_value(alpha);
+        command_interfaces_[2].set_value(-alpha);
         
         return controller_interface::return_type::OK;
     }

@@ -83,7 +83,7 @@ namespace riptide_controllers {
         controller_interface::InterfaceConfiguration state_interfaces_config;
         state_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
         std::string prefix = std::string(get_node()->get_namespace()).substr(1);
-        state_interfaces_config.names.push_back(prefix + "_" + params_.pressure_name + "/pressure");
+        state_interfaces_config.names.push_back(prefix + "_" + params_.pressure_name + "/depth");
         return state_interfaces_config;
     }
 
@@ -103,7 +103,7 @@ namespace riptide_controllers {
         // Only if a goal has been provided
         if (goal_handle_ != nullptr) {
             error = requested_depth_ - state_interfaces_[0].get_value();
-            u0 = 1.;
+            u0 = 0.1;
 
             // Check if the goal is canceled
             if (goal_handle_->is_canceling()) {
@@ -145,6 +145,7 @@ namespace riptide_controllers {
     rclcpp_action::CancelResponse DepthController::handle_cancel(const std::shared_ptr<GoalHandleDepth> goal_handle) {
         RCLCPP_INFO(get_node()->get_logger(), "Received request to cancel goal");
         (void)goal_handle;
+        goal_handle_ = nullptr;
         return rclcpp_action::CancelResponse::ACCEPT;
     }
 

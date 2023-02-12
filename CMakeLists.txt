@@ -59,11 +59,11 @@ install(
   LIBRARY DESTINATION lib
 )
 
-
 ## Broadcaster library
 # tester source files
 list(APPEND broadcaster_controllers
     src/broadcasters/riptide_pressure_broadcaster.cpp
+    src/broadcasters/riptide_battery_card_broadcaster.cpp
 )
 
 # Compile broadcaster library

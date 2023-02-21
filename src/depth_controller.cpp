@@ -99,6 +99,7 @@ namespace riptide_controllers {
         // Only if a goal has been provided
         if (goal_handle_ != nullptr) {
             error = requested_depth_ - state_interfaces_[0].get_value();
+            RCLCPP_INFO(get_node()->get_logger(), "Current error %f", error);
             u0 = 0.1;
 
             // Check if the goal is canceled

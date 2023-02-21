@@ -8,11 +8,14 @@
 
 #include "realtime_tools/realtime_buffer.h"
 
-#include <string>
+#include <cmath>
+#include <eigen3/Eigen/Dense>
+#include <functional>
 #include <memory>
 #include <mutex>
-#include <eigen3/Eigen/Dense>
-#include <cmath>
+#include <string>
+#include <thread>
+
 
 namespace riptide_controllers {
 
@@ -93,46 +96,14 @@ namespace riptide_controllers {
 
     controller_interface::return_type DepthController::update(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) {
         std::lock_guard<std::mutex> lock_(depth_mutex_);
-        double error = 0;
-        double u0 = 0.;
+        current_depth_ = state_interfaces_[0].get_value();
 
-        // Only if a goal has been provided
-        if (goal_handle_ != nullptr) {
-            error = requested_depth_ - state_interfaces_[0].get_value();
-            RCLCPP_INFO(get_node()->get_logger(), "Current error %f", error);
-            u0 = 0.1;
+        double u0 = 1.;
+        double alpha = std::atan(error_);
+        command_interfaces_[0].set_value(u0);
+        command_interfaces_[1].set_value(alpha);
+        command_interfaces_[2].set_value(-alpha);
 
-            // Check if the goal is canceled
-            if (goal_handle_->is_canceling()) {
-                result_->depth = state_interfaces_[0].get_value();
-                goal_handle_->canceled(result_);
-                RCLCPP_INFO(get_node()->get_logger(), "Goal canceled");
-            }
-            // Check if the goal is validated
-            else if (goal_handle_->is_executing() && std::abs(error) < 0.1) {
-                result_->depth = state_interfaces_[0].get_value();
-                goal_handle_->succeed(result_);
-                goal_handle_ = nullptr;
-            }
-            // Publish the feedback
-            else {
-                feedback_->error = error;
-                goal_handle_->publish_feedback(feedback_);
-
-                // Command
-                // double Kp = 1.;
-                double alpha = std::atan(error);
-                command_interfaces_[0].set_value(u0);
-                command_interfaces_[1].set_value(alpha);
-                command_interfaces_[2].set_value(-alpha);
-            }
-        }
-        else {
-            command_interfaces_[0].set_value(0);
-            command_interfaces_[1].set_value(0);
-            command_interfaces_[2].set_value(0);
-        }
-        
         return controller_interface::return_type::OK;
     }
 
@@ -147,12 +118,56 @@ namespace riptide_controllers {
     rclcpp_action::CancelResponse DepthController::handle_cancel(const std::shared_ptr<GoalHandleDepth> goal_handle) {
         RCLCPP_INFO(get_node()->get_logger(), "Received request to cancel goal");
         (void)goal_handle;
-        goal_handle_ = nullptr;
         return rclcpp_action::CancelResponse::ACCEPT;
     }
 
     void DepthController::handle_accepted(const std::shared_ptr<GoalHandleDepth> goal_handle) {
-        goal_handle_ = goal_handle;
+        RCLCPP_INFO(get_node()->get_logger(), "Handle accepted");
+        std::thread{std::bind(&DepthController::execute, this, std::placeholders::_1), goal_handle}.detach();
+    }
+
+    void DepthController::execute(const std::shared_ptr<GoalHandleDepth> goal_handle) {
+        RCLCPP_INFO(get_node()->get_logger(), "Executing goal");
+
+        rclcpp::Rate loop_rate(10);
+
+        double current_depth;
+        const auto goal = goal_handle->get_goal();
+        auto feedback = std::make_shared<Depth::Feedback>();
+        auto result = std::make_shared<Depth::Result>();
+
+        while (rclcpp::ok()) {
+            {
+                std::lock_guard<std::mutex> lock_(depth_mutex_);
+                current_depth = current_depth_;
+                error_ = requested_depth_ - current_depth;
+                feedback->error = error_;
+            }
+
+            // Check if the goal is canceled
+            if (goal_handle->is_canceling()) {
+                result_->depth = current_depth;
+                goal_handle->canceled(result_);
+                RCLCPP_INFO(get_node()->get_logger(), "Goal canceled");
+            }
+
+            // Publish feedback
+            goal_handle->publish_feedback(feedback);
+            RCLCPP_INFO(get_node()->get_logger(), "Publish Feedback");
+
+            // Check if the goal is validated
+            if (std::abs(feedback->error) < 0.1) {
+                result_->depth = current_depth;
+                goal_handle->succeed(result_);
+                break;
+            }
+
+            // Loop rate
+            loop_rate.sleep();
+        }
+        
+        // Reseting error
+        error_ = 0;
     }
 
 } // riptide_controllers

@@ -43,13 +43,15 @@ namespace riptide_controllers {
 
             rclcpp_action::CancelResponse handle_cancel(const std::shared_ptr<GoalHandleDepth> goal_handle);
 
+            void execute(const std::shared_ptr<GoalHandleDepth> goal_handle);
+
             void handle_accepted(const std::shared_ptr<GoalHandleDepth> goal_handle);
 
             std::mutex depth_mutex_;
 
+            double error_;
             double requested_depth_;
-
-            std::shared_ptr<GoalHandleDepth> goal_handle_;
+            double current_depth_;
 
             // Action handle
             std::shared_ptr<Depth::Feedback> feedback_;

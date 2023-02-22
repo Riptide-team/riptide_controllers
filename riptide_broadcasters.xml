@@ -1,12 +1,17 @@
 <library path="riptide_broadcasters">
     <class name="riptide_broadcasters/PressureBroadcaster" type="riptide_broadcasters::PressureBroadcaster"  base_class_type="controller_interface::ControllerInterface">
         <description>
-            Riptide actuator tester
+            Riptide pressure broadcaster
         </description>
     </class>
     <class name="riptide_broadcasters/BatteryCardBroadcaster" type="riptide_broadcasters::BatteryCardBroadcaster"  base_class_type="controller_interface::ControllerInterface">
         <description>
-            Riptide actuator tester
+            Riptide battery card broadcaster
+        </description>
+    </class>
+    <class name="riptide_broadcasters/ImuBroadcaster" type="riptide_broadcasters::ImuBroadcaster"  base_class_type="controller_interface::ControllerInterface">
+        <description>
+            Riptide imu broadcaster
         </description>
     </class>
 </library>

@@ -87,10 +87,16 @@ namespace riptide_controllers {
     }
 
     controller_interface::CallbackReturn DepthController::on_activate(const rclcpp_lifecycle::State & /*previous_state*/) {
+        command_interfaces_[0].set_value(0);
+        command_interfaces_[1].set_value(0);
+        command_interfaces_[2].set_value(0);
         return CallbackReturn::SUCCESS;
     }
 
     controller_interface::CallbackReturn DepthController::on_deactivate(const rclcpp_lifecycle::State & /*previous_state*/) {
+        command_interfaces_[0].set_value(0);
+        command_interfaces_[1].set_value(0);
+        command_interfaces_[2].set_value(0);
         return CallbackReturn::SUCCESS;
     }
 

@@ -4,16 +4,17 @@
 #include "riptide_imu_broadcaster_parameters.hpp"
 #include <string>
 
+#include "realtime_tools/realtime_publisher.h"
 #include <sensor_msgs/msg/imu.hpp>
 
 namespace riptide_testers {
 
-    class RiptideIMUBroadcaster : public controller_interface::ControllerInterface {
+    class RiptideImuBroadcaster : public controller_interface::ControllerInterface {
         public:
 
             using Msg = sensor_msgs::msg::Imu;
 
-            RiptideIMUBroadcaster();
+            RiptideImuBroadcaster();
 
             controller_interface::InterfaceConfiguration command_interface_configuration() const override;
 
@@ -32,8 +33,6 @@ namespace riptide_testers {
         private:
             std::shared_ptr<riptide_imu_broadcaster::ParamListener> param_listener_;
             riptide_imu_broadcaster::Params params_;
-
-            rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_publisher_;
 
             // Pressure publisher
             std::shared_ptr<rclcpp::Publisher<Msg>> imu_publisher_ = nullptr;

@@ -87,7 +87,7 @@ namespace riptide_broadcasters {
         return CallbackReturn::SUCCESS;
     }
 
-    controller_interface::return_type ImuBroadcaster::update(const rclcpp::Time & time, const rclcpp::Duration & /*period*/) {
+    controller_interface::return_type ImuBroadcaster::update(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) {
         if (realtime_imu_publisher_ && realtime_imu_publisher_->trylock()) {
             // Header
             realtime_imu_publisher_->msg_.header.stamp = get_node()->now();

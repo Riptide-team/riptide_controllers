@@ -16,10 +16,10 @@
 
 namespace riptide_broadcaster {
 
-    RiptideActuatorsTester::RiptideActuatorsTester() :
+    RiptideActuatorsBroadcaster::RiptideActuatorsBroadcaster() :
         controller_interface::ControllerInterface() {}
 
-    controller_interface::CallbackReturn RiptideActuatorsTester::on_init() {
+    controller_interface::CallbackReturn RiptideActuatorsBroadcaster::on_init() {
         try {
             param_listener_ = std::make_shared<riptide_actuators_broadcaster::ParamListener>(get_node());
             params_ = param_listener_->get_params();
@@ -33,7 +33,7 @@ namespace riptide_broadcaster {
         return CallbackReturn::SUCCESS;
     }
 
-    controller_interface::CallbackReturn RiptideActuatorsTester::on_configure(const rclcpp_lifecycle::State & /*previous_state*/) {
+    controller_interface::CallbackReturn RiptideActuatorsBroadcaster::on_configure(const rclcpp_lifecycle::State & /*previous_state*/) {
         params_ = param_listener_->get_params();
         if (params_.d_joint.empty()) {
             RCLCPP_ERROR(get_node()->get_logger(), "'d_joint' parameter has to be specified.");
@@ -68,13 +68,13 @@ namespace riptide_broadcaster {
         return CallbackReturn::SUCCESS;
     }
 
-    controller_interface::InterfaceConfiguration RiptideActuatorsTester::command_interface_configuration() const {
+    controller_interface::InterfaceConfiguration RiptideActuatorsBroadcaster::command_interface_configuration() const {
         controller_interface::InterfaceConfiguration command_interfaces_config;
         command_interfaces_config.type = controller_interface::interface_configuration_type::NONE;
         return command_interfaces_config;
     }
 
-    controller_interface::InterfaceConfiguration RiptideActuatorsTester::state_interface_configuration() const {
+    controller_interface::InterfaceConfiguration RiptideActuatorsBroadcaster::state_interface_configuration() const {
         controller_interface::InterfaceConfiguration state_interfaces_config;
         std::string prefix = std::string(get_node()->get_namespace()).substr(1);
         state_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
@@ -85,15 +85,15 @@ namespace riptide_broadcaster {
         return state_interfaces_config;
     }
 
-    controller_interface::CallbackReturn RiptideActuatorsTester::on_activate(const rclcpp_lifecycle::State & /*previous_state*/) {
+    controller_interface::CallbackReturn RiptideActuatorsBroadcaster::on_activate(const rclcpp_lifecycle::State & /*previous_state*/) {
         return CallbackReturn::SUCCESS;
     }
 
-    controller_interface::CallbackReturn RiptideActuatorsTester::on_deactivate(const rclcpp_lifecycle::State & /*previous_state*/) {
+    controller_interface::CallbackReturn RiptideActuatorsBroadcaster::on_deactivate(const rclcpp_lifecycle::State & /*previous_state*/) {
         return CallbackReturn::SUCCESS;
     }
 
-    controller_interface::return_type RiptideActuatorsTester::update(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) {
+    controller_interface::return_type RiptideActuatorsBroadcaster::update(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) {
 
         if (realtime_actuators_publisher_ && realtime_actuators_publisher_->trylock()) {
             // Header
@@ -113,4 +113,4 @@ namespace riptide_broadcaster {
 
 #include "pluginlib/class_list_macros.hpp"
 
-PLUGINLIB_EXPORT_CLASS(riptide_testers::RiptideActuatorsTester, controller_interface::ControllerInterface)
+PLUGINLIB_EXPORT_CLASS(riptide_testers::RiptideActuatorsBroadcaster, controller_interface::ControllerInterface)

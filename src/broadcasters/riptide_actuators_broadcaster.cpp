@@ -1,4 +1,4 @@
-#include "riptide_controllers/testers/riptide_actuators_broadcaster.hpp"
+#include "riptide_controllers/broadcasters/riptide_actuators_broadcaster.hpp"
 #include "riptide_actuators_broadcaster_parameters.hpp"
 #include "controller_interface/controller_interface.hpp"
 

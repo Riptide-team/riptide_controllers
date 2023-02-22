@@ -5,8 +5,10 @@
 #include <string>
 
 #include <riptide_msgs/msg/actuators.hpp>
+#include <realtime_tools/realtime_publisher.h>
 
-namespace riptide_testers {
+
+namespace riptide_broadcasters {
 
     class RiptideActuatorsBroadcaster : public controller_interface::ControllerInterface {
         public:
@@ -38,4 +40,4 @@ namespace riptide_testers {
             std::shared_ptr<realtime_tools::RealtimePublisher<Msg>> realtime_actuators_publisher_ = nullptr;
     };
 
-} // riptide_testers
+} // riptide_broadcasters

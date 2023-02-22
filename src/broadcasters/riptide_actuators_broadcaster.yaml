@@ -19,3 +19,9 @@ riptide_actuators_broadcaster:
     description: "Specifies which joints will be used by the controller for the thruster.",
     read_only: true
   }
+  topic_name: {
+    type: string,
+    default_value: "~/actuators_status",
+    description: "Specifies which joints will be used by the controller for the thruster.",
+    read_only: true
+  }

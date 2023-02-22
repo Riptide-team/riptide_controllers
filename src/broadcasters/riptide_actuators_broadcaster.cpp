@@ -14,7 +14,7 @@
 #include <eigen3/Eigen/Dense>
 #include <cmath>
 
-namespace riptide_broadcaster {
+namespace riptide_broadcasters {
 
     RiptideActuatorsBroadcaster::RiptideActuatorsBroadcaster() :
         controller_interface::ControllerInterface() {}
@@ -55,9 +55,9 @@ namespace riptide_broadcaster {
         // Publisher
         try {
             // register ft sensor data publisher
-            actuators_publisher_ = get_node()->create_publisher<Msg>(params_.topic.c_str(), rclcpp::SystemDefaultsQoS());
+            actuators_publisher_ = get_node()->create_publisher<Msg>(params_.topic_name.c_str(), rclcpp::SystemDefaultsQoS());
             realtime_actuators_publisher_ = std::make_shared<realtime_tools::RealtimePublisher<Msg>>(actuators_publisher_);
-            RCLCPP_INFO(get_node()->get_logger(), "Publishing status on %s", params_.topic.c_str());
+            RCLCPP_INFO(get_node()->get_logger(), "Publishing status on %s", params_.topic_name.c_str());
         }
         catch (const std::exception & e) {
             RCLCPP_FATAL(get_node()->get_logger(), "Exception thrown during publisher creation at configure stage with message : %s", e.what());
@@ -78,10 +78,10 @@ namespace riptide_broadcaster {
         controller_interface::InterfaceConfiguration state_interfaces_config;
         std::string prefix = std::string(get_node()->get_namespace()).substr(1);
         state_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
-        command_interfaces_config.names.push_back(prefix + "_" + params_.thruster_joint + "/position");
-        command_interfaces_config.names.push_back(prefix + "_" + params_.d_joint + "/position");
-        command_interfaces_config.names.push_back(prefix + "_" + params_.p_joint + "/position");
-        command_interfaces_config.names.push_back(prefix + "_" + params_.s_joint + "/position");
+        state_interfaces_config.names.push_back(prefix + "_" + params_.thruster_joint + "/position");
+        state_interfaces_config.names.push_back(prefix + "_" + params_.d_joint + "/position");
+        state_interfaces_config.names.push_back(prefix + "_" + params_.p_joint + "/position");
+        state_interfaces_config.names.push_back(prefix + "_" + params_.s_joint + "/position");
         return state_interfaces_config;
     }
 
@@ -109,8 +109,8 @@ namespace riptide_broadcaster {
 
         return controller_interface::return_type::OK;
     }
-} // riptide_testers
+} // riptide_broadcaster
 
 #include "pluginlib/class_list_macros.hpp"
 
-PLUGINLIB_EXPORT_CLASS(riptide_testers::RiptideActuatorsBroadcaster, controller_interface::ControllerInterface)
+PLUGINLIB_EXPORT_CLASS(riptide_broadcasters::RiptideActuatorsBroadcaster, controller_interface::ControllerInterface)

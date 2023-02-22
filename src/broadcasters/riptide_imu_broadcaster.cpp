@@ -17,10 +17,10 @@
 
 namespace riptide_testers {
 
-    RiptideImuBroadcaster::RiptideImuBroadcaster() :
+    ImuBroadcaster::ImuBroadcaster() :
         controller_interface::ControllerInterface() {}
 
-    controller_interface::CallbackReturn RiptideImuBroadcaster::on_init() {
+    controller_interface::CallbackReturn ImuBroadcaster::on_init() {
         try {
             param_listener_ = std::make_shared<riptide_imu_broadcaster::ParamListener>(get_node());
             params_ = param_listener_->get_params();
@@ -34,7 +34,7 @@ namespace riptide_testers {
         return CallbackReturn::SUCCESS;
     }
 
-    controller_interface::CallbackReturn RiptideImuBroadcaster::on_configure(const rclcpp_lifecycle::State & /*previous_state*/) {
+    controller_interface::CallbackReturn ImuBroadcaster::on_configure(const rclcpp_lifecycle::State & /*previous_state*/) {
         params_ = param_listener_->get_params();
         if (params_.sensor_name.empty()) {
             RCLCPP_ERROR(get_node()->get_logger(), "'sensor_name' parameter has to be specified.");
@@ -59,13 +59,13 @@ namespace riptide_testers {
         return CallbackReturn::SUCCESS;
     }
 
-    controller_interface::InterfaceConfiguration RiptideImuBroadcaster::command_interface_configuration() const {
+    controller_interface::InterfaceConfiguration ImuBroadcaster::command_interface_configuration() const {
         controller_interface::InterfaceConfiguration command_interfaces_config;
         command_interfaces_config.type = controller_interface::interface_configuration_type::NONE;
         return command_interfaces_config;
     }
 
-    controller_interface::InterfaceConfiguration RiptideImuBroadcaster::state_interface_configuration() const {
+    controller_interface::InterfaceConfiguration ImuBroadcaster::state_interface_configuration() const {
         controller_interface::InterfaceConfiguration state_interfaces_config;
         state_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
         std::string prefix = std::string(get_node()->get_namespace()).substr(1);
@@ -79,15 +79,15 @@ namespace riptide_testers {
         return state_interfaces_config;
     }
 
-    controller_interface::CallbackReturn RiptideImuBroadcaster::on_activate(const rclcpp_lifecycle::State & /*previous_state*/) {
+    controller_interface::CallbackReturn ImuBroadcaster::on_activate(const rclcpp_lifecycle::State & /*previous_state*/) {
         return CallbackReturn::SUCCESS;
     }
 
-    controller_interface::CallbackReturn RiptideImuBroadcaster::on_deactivate(const rclcpp_lifecycle::State & /*previous_state*/) {
+    controller_interface::CallbackReturn ImuBroadcaster::on_deactivate(const rclcpp_lifecycle::State & /*previous_state*/) {
         return CallbackReturn::SUCCESS;
     }
 
-    controller_interface::return_type RiptideImuBroadcaster::update(const rclcpp::Time & time, const rclcpp::Duration & /*period*/) {
+    controller_interface::return_type ImuBroadcaster::update(const rclcpp::Time & time, const rclcpp::Duration & /*period*/) {
         RCLCPP_INFO(
             get_node()->get_logger(), "[%f]s a=[%f, %f, %f], w=[%f, %f, %f]", time.seconds(),
             state_interfaces_[0].get_value(), state_interfaces_[1].get_value(), state_interfaces_[2].get_value(),
@@ -116,4 +116,4 @@ namespace riptide_testers {
 
 #include "pluginlib/class_list_macros.hpp"
 
-PLUGINLIB_EXPORT_CLASS(riptide_testers::RiptideImuBroadcaster, controller_interface::ControllerInterface)
+PLUGINLIB_EXPORT_CLASS(riptide_testers::ImuBroadcaster, controller_interface::ControllerInterface)

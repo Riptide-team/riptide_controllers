@@ -9,12 +9,12 @@
 
 namespace riptide_testers {
 
-    class RiptideImuBroadcaster : public controller_interface::ControllerInterface {
+    class ImuBroadcaster : public controller_interface::ControllerInterface {
         public:
 
             using Msg = sensor_msgs::msg::Imu;
 
-            RiptideImuBroadcaster();
+            ImuBroadcaster();
 
             controller_interface::InterfaceConfiguration command_interface_configuration() const override;
 

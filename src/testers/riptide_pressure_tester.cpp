@@ -12,6 +12,7 @@
 #include <eigen3/Eigen/Dense>
 #include <cmath>
 
+
 namespace riptide_testers {
 
     RiptidePressureTester::RiptidePressureTester() :

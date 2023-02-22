@@ -98,7 +98,9 @@ namespace riptide_controllers {
         std::lock_guard<std::mutex> lock_(depth_mutex_);
         current_depth_ = state_interfaces_[0].get_value();
 
-        double u0 = 1.;
+        error_ = requested_depth_ - current_depth_;
+
+        double u0 = params_.thruster_velocity;
         double alpha = std::atan(error_);
         command_interfaces_[0].set_value(u0);
         command_interfaces_[1].set_value(alpha);
@@ -165,9 +167,6 @@ namespace riptide_controllers {
             // Loop rate
             loop_rate.sleep();
         }
-        
-        // Reseting error
-        error_ = 0;
     }
 
 } // riptide_controllers

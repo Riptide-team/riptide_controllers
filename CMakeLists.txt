@@ -90,11 +90,12 @@ install(
 generate_parameter_library(state_estimator_parameters src/state_estimator.yaml)
 generate_parameter_library(riptide_controller_parameters src/riptide_controller.yaml)
 generate_parameter_library(depth_controller_parameters src/depth_controller.yaml)
+generate_parameter_library(actuators_reset_parameters src/actuators_reset.yaml)
 generate_parameter_library(riptide_echosounder_parameters src/riptide_echosounder.yaml)
 
-add_library(${PROJECT_NAME} SHARED src/state_estimator.cpp src/riptide_controller.cpp src/riptide_echosounder.cpp src/depth_controller.cpp)
+add_library(${PROJECT_NAME} SHARED src/state_estimator.cpp src/riptide_controller.cpp src/riptide_echosounder.cpp src/depth_controller.cpp src/actuators_reset.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE include)
-target_link_libraries(${PROJECT_NAME} state_estimator_parameters riptide_controller_parameters riptide_echosounder_parameters depth_controller_parameters Eigen3::Eigen)
+target_link_libraries(${PROJECT_NAME} state_estimator_parameters riptide_controller_parameters riptide_echosounder_parameters depth_controller_parameters actuators_reset_parameters Eigen3::Eigen)
 ament_target_dependencies(${PROJECT_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 pluginlib_export_plugin_description_file(controller_interface riptide_controllers.xml)

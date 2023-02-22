@@ -1,0 +1,11 @@
+riptide_imu_broadcaster:
+  sensor_name: {
+    type: string,
+    description: "Specifies the sensor name used in URDF's HardwareInterface (e.g `imu`).",
+    read_only: true
+  }
+  topic: {
+    type: string,
+    default_value: "~/imu_status",
+    description: "Name of the published topic.",
+  }

@@ -4,3 +4,8 @@ pressure_broadcaster:
     default_value: "",
     description: "Name of the sensor used as prefix for interfaces if there are no individual interface names defined.",
   }
+  topic: {
+    type: string,
+    default_value: "~/pressure_status",
+    description: "Name of the published topic.",
+  }

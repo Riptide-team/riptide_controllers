@@ -8,7 +8,7 @@
 
 #include "realtime_tools/realtime_buffer.h"
 
-#include <riptide_msgs/msg/Actuators.msg>
+#include <riptide_msgs/msg/actuators.hpp>
 
 #include <string>
 #include <eigen3/Eigen/Dense>

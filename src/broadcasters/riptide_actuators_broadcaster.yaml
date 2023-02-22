@@ -1,0 +1,21 @@
+riptide_actuators_broadcaster:
+  d_joint: {
+    type: string,
+    description: "Specifies which joints will be used by the controller for the d fin.",
+    read_only: true
+  }
+  p_joint: {
+    type: string,
+    description: "Specifies which joints will be used by the controller for the p fin.",
+    read_only: true
+  }
+  s_joint: {
+    type: string,
+    description: "Specifies which joints will be used by the controller for the s fin.",
+    read_only: true
+  }
+  thruster_joint: {
+    type: string,
+    description: "Specifies which joints will be used by the controller for the thruster.",
+    read_only: true
+  }

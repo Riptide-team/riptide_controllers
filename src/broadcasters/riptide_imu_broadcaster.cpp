@@ -88,12 +88,6 @@ namespace riptide_broadcasters {
     }
 
     controller_interface::return_type ImuBroadcaster::update(const rclcpp::Time & time, const rclcpp::Duration & /*period*/) {
-        RCLCPP_INFO(
-            get_node()->get_logger(), "[%f]s a=[%f, %f, %f], w=[%f, %f, %f]", time.seconds(),
-            state_interfaces_[0].get_value(), state_interfaces_[1].get_value(), state_interfaces_[2].get_value(),
-            state_interfaces_[3].get_value(), state_interfaces_[4].get_value(), state_interfaces_[5].get_value()
-        );
-
         if (realtime_imu_publisher_ && realtime_imu_publisher_->trylock()) {
             // Header
             realtime_imu_publisher_->msg_.header.stamp = get_node()->now();

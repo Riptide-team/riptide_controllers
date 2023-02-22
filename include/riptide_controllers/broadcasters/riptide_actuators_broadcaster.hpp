@@ -4,7 +4,7 @@
 #include "riptide_actuators_broadcaster_parameters.hpp"
 #include <string>
 
-#include <riptide_msgs/msg/Actuators.msg>
+#include <riptide_msgs/msg/actuators.hpp>
 
 namespace riptide_testers {
 

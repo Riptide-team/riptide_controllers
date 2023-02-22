@@ -5,7 +5,6 @@
 
 #include <string>
 #include <vector>
-
 #include <sensor_msgs/msg/battery_state.hpp>
 
 

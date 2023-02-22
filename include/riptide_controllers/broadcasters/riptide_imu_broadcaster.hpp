@@ -7,7 +7,7 @@
 #include "realtime_tools/realtime_publisher.h"
 #include <sensor_msgs/msg/imu.hpp>
 
-namespace riptide_testers {
+namespace riptide_broadcasters {
 
     class ImuBroadcaster : public controller_interface::ControllerInterface {
         public:

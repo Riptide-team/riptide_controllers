@@ -15,7 +15,7 @@
 #include <sensor_msgs/msg/imu.hpp>
 
 
-namespace riptide_testers {
+namespace riptide_broadcasters {
 
     ImuBroadcaster::ImuBroadcaster() :
         controller_interface::ControllerInterface() {}
@@ -112,8 +112,8 @@ namespace riptide_testers {
 
         return controller_interface::return_type::OK;
     }
-} // riptide_testers
+} // riptide_broadcasters
 
 #include "pluginlib/class_list_macros.hpp"
 
-PLUGINLIB_EXPORT_CLASS(riptide_testers::ImuBroadcaster, controller_interface::ControllerInterface)
+PLUGINLIB_EXPORT_CLASS(riptide_broadcasters::ImuBroadcaster, controller_interface::ControllerInterface)

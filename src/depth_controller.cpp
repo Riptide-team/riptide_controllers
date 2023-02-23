@@ -115,6 +115,8 @@ namespace riptide_controllers {
         command_interfaces_[1].set_value(alpha);
         command_interfaces_[2].set_value(-alpha);
 
+        RCLCPP_INFO(get_node()->get_logger(), "Actuators: %f, %f", u0, alpha);
+
         return controller_interface::return_type::OK;
     }
 

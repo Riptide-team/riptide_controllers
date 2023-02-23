@@ -10,12 +10,12 @@
 
 namespace riptide_broadcasters {
 
-    class RiptideActuatorsBroadcaster : public controller_interface::ControllerInterface {
+    class ActuatorsBroadcaster : public controller_interface::ControllerInterface {
         public:
 
             using Msg = riptide_msgs::msg::Actuators;
 
-            RiptideActuatorsBroadcaster();
+            ActuatorsBroadcaster();
 
             controller_interface::InterfaceConfiguration command_interface_configuration() const override;
 

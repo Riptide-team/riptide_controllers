@@ -19,6 +19,8 @@
 
 namespace riptide_controllers {
 
+    DepthController::DepthController() : controller_interface::ControllerInterface() {}
+
     controller_interface::CallbackReturn DepthController::on_init() {
         try {
             param_listener_ = std::make_shared<depth_controller::ParamListener>(get_node());
@@ -51,10 +53,10 @@ namespace riptide_controllers {
             return CallbackReturn::ERROR;
         }
 
-        feedback_ = std::make_shared<Action::Feedback>();
-        result_ = std::make_shared<Action::Result>();
+        feedback_ = std::make_shared<riptide_msgs::action::Depth::Feedback>();
+        result_ = std::make_shared<riptide_msgs::action::Depth::Result>();
 
-        action_server_ = rclcpp_action::create_server<Action>(
+        action_server_ = rclcpp_action::create_server<riptide_msgs::action::Depth>(
             get_node(),
             "depth",
             std::bind(&DepthController::handle_goal, this, std::placeholders::_1, std::placeholders::_2),
@@ -62,8 +64,8 @@ namespace riptide_controllers {
             std::bind(&DepthController::handle_accepted, this, std::placeholders::_1)
         );
 
+        u0 = params_.thruster_velocity;
         K_inf_ = params_.K_inf;
-        K_fin_ = params_.K_fin;
         r_ = params_.r;
 
         RCLCPP_DEBUG(get_node()->get_logger(), "configure successful");
@@ -110,107 +112,70 @@ namespace riptide_controllers {
         std::lock_guard<std::mutex> lock_(depth_mutex_);
         current_depth_ = state_interfaces_[0].get_value();
 
-        auto q = Eigen::Quaterniond(state_interfaces_[4].get_value(), state_interfaces_[1].get_value(), state_interfaces_[2].get_value(), state_interfaces_[3].get_value());
-        euler_angles_ = q.toRotationMatrix().eulerAngles(0, 1, 2);
+        error_ = requested_depth_ - current_depth_;
 
-        if (running_) {
-            command_interfaces_[0].set_value(params_.thruster_velocity);
-            command_interfaces_[1].set_value(alpha);
-            command_interfaces_[2].set_value(-alpha);
-        }
-        else {
-            command_interfaces_[0].set_value(0.);
-            command_interfaces_[1].set_value(0.);
-            command_interfaces_[2].set_value(0.);
-        }
+        double alpha = K_inf_ * std::atan(error_ / r_) * 2. / M_PI;
+        command_interfaces_[0].set_value(u0);
+        command_interfaces_[1].set_value(alpha);
+        command_interfaces_[2].set_value(-alpha);
 
         return controller_interface::return_type::OK;
     }
 
-    rclcpp_action::GoalResponse DepthController::handle_goal(const rclcpp_action::GoalUUID & uuid, std::shared_ptr<const Action::Goal> goal) {
+    rclcpp_action::GoalResponse DepthController::handle_goal(const rclcpp_action::GoalUUID & uuid, std::shared_ptr<const Depth::Goal> goal) {
         std::lock_guard<std::mutex> lock_(depth_mutex_);
         requested_depth_ = goal->requested_depth;
-        duration_ = goal->duration.sec + goal->duration.nanosec * 1e-9;
-        RCLCPP_INFO(get_node()->get_logger(), "Action: d=%fm, d=%d,%ds", goal->requested_depth, goal->duration.sec, goal->duration.nanosec);
+        RCLCPP_INFO(get_node()->get_logger(), "Received depth request with order %f", goal->requested_depth);
         (void)uuid;
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
     }
 
-    rclcpp_action::CancelResponse DepthController::handle_cancel(const std::shared_ptr<GoalHandle> goal_handle) {
+    rclcpp_action::CancelResponse DepthController::handle_cancel(const std::shared_ptr<GoalHandleDepth> goal_handle) {
         RCLCPP_INFO(get_node()->get_logger(), "Received request to cancel goal");
         (void)goal_handle;
         return rclcpp_action::CancelResponse::ACCEPT;
     }
 
-    void DepthController::handle_accepted(const std::shared_ptr<GoalHandle> goal_handle) {
+    void DepthController::handle_accepted(const std::shared_ptr<GoalHandleDepth> goal_handle) {
         RCLCPP_INFO(get_node()->get_logger(), "Handle accepted");
         std::thread{std::bind(&DepthController::execute, this, std::placeholders::_1), goal_handle}.detach();
     }
 
-    void DepthController::execute(const std::shared_ptr<GoalHandle> goal_handle) {
+    void DepthController::execute(const std::shared_ptr<GoalHandleDepth> goal_handle) {
         RCLCPP_INFO(get_node()->get_logger(), "Executing goal");
 
-        rclcpp::Time starting_time_ = get_node()->get_clock()->now();
+        rclcpp::Rate loop_rate(5);
 
-        rclcpp::Rate loop_rate(10);
-
-        auto goal = goal_handle->get_goal();
-        auto feedback = std::make_shared<Action::Feedback>();
-        auto result = std::make_shared<Action::Result>();
+        double current_depth;
+        const auto goal = goal_handle->get_goal();
+        auto feedback = std::make_shared<Depth::Feedback>();
+        auto result = std::make_shared<Depth::Result>();
 
         while (rclcpp::ok()) {
             {
                 std::lock_guard<std::mutex> lock_(depth_mutex_);
+                current_depth = current_depth_;
+                error_ = requested_depth_ - current_depth;
+                feedback->error = error_;
+            }
 
-                // Variables getting
-                depth_error_ = current_depth_ - requested_depth_;
-                feedback->depth_error = depth_error_;
+            // Check if the goal is canceled
+            if (goal_handle->is_canceling()) {
+                result_->depth = current_depth;
+                goal_handle->canceled(result_);
+                RCLCPP_INFO(get_node()->get_logger(), "Goal canceled");
+            }
 
-                // Command creating
-                alpha = K_fin_ * (K_inf_ * std::atan(depth_error_ / r_) * 2. / M_PI - euler_angles_[1]);
+            // Publish feedback
+            goal_handle->publish_feedback(feedback);
+            RCLCPP_INFO(get_node()->get_logger(), "Publish Feedback");
 
-                // Time
-                rclcpp::Duration elapsed_time = get_node()->get_clock()->now() - starting_time_;
-                feedback->elapsed_time.sec = elapsed_time.seconds();
-                feedback->elapsed_time.nanosec = elapsed_time.nanoseconds();
-
-                // Check if the goal is canceled
-                if (goal_handle->is_canceling()) {
-                    running_ = false;
-                    result_->depth = current_depth_;
-                    result->elapsed_time.sec = elapsed_time.seconds();
-                    result->elapsed_time.nanosec = elapsed_time.nanoseconds();
-                    goal_handle->canceled(result_);
-                    RCLCPP_INFO(get_node()->get_logger(), "Goal canceled");
-                }
-
-                // Publish feedback
-                goal_handle->publish_feedback(feedback);
-                RCLCPP_INFO(get_node()->get_logger(), "Publish Feedback");
-
-                // Check if the goal is depth validated
-                // TODO put 0.25 as parameter
-                if (std::abs(feedback->depth_error) < 0.25 && !reached_flag_) {
-                    rclcpp::Time reaching_time_ = get_node()->get_clock()->now();
-                    reached_flag_ = true;
-                }
-
-                // Check duration
-                if (rclcpp::Duration(goal->duration) > elapsed_time) {
-                    running_ = false;
-                    result_->depth = current_depth_;
-                    result->elapsed_time.sec = elapsed_time.seconds();
-                    result->elapsed_time.nanosec = elapsed_time.nanoseconds();
-
-                    if (reached_flag_) {
-                        goal_handle->succeed(result_);
-                    }
-                    else {
-                        goal_handle->abort(result_);
-                    }
-                    break;
-                }
-            } // mutex scope
+            // Check if the goal is validated
+            if (std::abs(feedback->error) < 0.1) {
+                result_->depth = current_depth;
+                goal_handle->succeed(result_);
+                break;
+            }
 
             // Loop rate
             loop_rate.sleep();

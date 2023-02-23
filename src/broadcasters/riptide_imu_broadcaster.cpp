@@ -69,13 +69,14 @@ namespace riptide_broadcasters {
         controller_interface::InterfaceConfiguration state_interfaces_config;
         state_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
         std::string prefix = std::string(get_node()->get_namespace()).substr(1);
-        std::vector<std::string> iface = {"linear_acceleration", "angular_velocity"};
+        std::vector<std::string> iface = {"linear_acceleration", "angular_velocity", "orientation"};
         std::vector<std::string> coords = {"x", "y", "z"};
         for (const auto &i: iface) {
             for (const auto &c: coords) {
                 state_interfaces_config.names.push_back(prefix + "_" + params_.sensor_name + "/" + i + "." + c);
             }
         }
+        state_interfaces_config.names.push_back(prefix + "_" + params_.sensor_name + "/orientation.w");
         return state_interfaces_config;
     }
 
@@ -100,6 +101,11 @@ namespace riptide_broadcasters {
             realtime_imu_publisher_->msg_.angular_velocity.x = state_interfaces_[3].get_value();
             realtime_imu_publisher_->msg_.angular_velocity.y = state_interfaces_[4].get_value();
             realtime_imu_publisher_->msg_.angular_velocity.z = state_interfaces_[5].get_value();
+
+            realtime_imu_publisher_->msg_.orientation.x = state_interfaces_[6].get_value();
+            realtime_imu_publisher_->msg_.orientation.y = state_interfaces_[7].get_value();
+            realtime_imu_publisher_->msg_.orientation.z = state_interfaces_[8].get_value();
+            realtime_imu_publisher_->msg_.orientation.w = state_interfaces_[9].get_value();
 
             realtime_imu_publisher_->unlockAndPublish();
         }

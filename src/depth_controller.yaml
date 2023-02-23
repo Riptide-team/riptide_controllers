@@ -19,9 +19,32 @@ depth_controller:
     description: "Specifies the pressure sensor name which will be claimed by the controller",
     read_only: true
   }
+  imu_name: {
+    type: string,
+    description: "Specifies the pressure sensor name which will be claimed by the controller",
+    read_only: true
+  }
   thruster_velocity: {
     type: double,
     default_value: 0.1,
     description: "Specifies the command applied to the thruster",
+    read_only: true
+  }
+  K_inf: {
+    type: double,
+    default_value: 0.52,
+    description: "Specifies the infinite command to the fins",
+    read_only: true
+  }
+  r: {
+    type: double,
+    default_value: 1.,
+    description: "Specifies the regulation corridor",
+    read_only: true
+  }
+  K_fin: {
+    type: double,
+    default_value: 1.,
+    description: "Specifies the proportianal factor for the fin regulation",
     read_only: true
   }

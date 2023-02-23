@@ -49,6 +49,7 @@ namespace riptide_controllers {
 
             std::mutex depth_mutex_;
 
+            double u0;
             double error_;
             double requested_depth_;
             double current_depth_;

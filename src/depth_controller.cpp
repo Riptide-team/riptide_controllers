@@ -64,7 +64,7 @@ namespace riptide_controllers {
             std::bind(&DepthController::handle_accepted, this, std::placeholders::_1)
         );
 
-        u0 = params_.pressure_name;
+        u0 = params_.thruster_velocity;
 
         RCLCPP_DEBUG(get_node()->get_logger(), "configure successful");
         return CallbackReturn::SUCCESS;

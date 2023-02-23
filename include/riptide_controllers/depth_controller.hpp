@@ -64,8 +64,8 @@ namespace riptide_controllers {
 
             double depth_error_;
 
-            rclcpp::Time starting_time_;
-            rclcpp::Time reaching_time_;
+            double starting_time_;
+            double reaching_time_;
             bool reached_flag_;
 
             bool running_;

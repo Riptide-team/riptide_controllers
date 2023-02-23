@@ -130,8 +130,8 @@ namespace riptide_controllers {
     rclcpp_action::GoalResponse DepthController::handle_goal(const rclcpp_action::GoalUUID & uuid, std::shared_ptr<const Action::Goal> goal) {
         std::lock_guard<std::mutex> lock_(depth_mutex_);
         requested_depth_ = goal->requested_depth;
-        duration_ = goal->duration.sec + goal->duration.nanosec * 1e-9;
-        RCLCPP_INFO(get_node()->get_logger(), "Action: d=%fm, d=%d,%ds", goal->requested_depth, goal->duration.sec, goal->duration.nanosec);
+        duration_ = goal->duration;
+        RCLCPP_INFO(get_node()->get_logger(), "Action: d=%fm, d=%fs", goal->requested_depth, goal->duration);
         (void)uuid;
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
     }
@@ -150,7 +150,7 @@ namespace riptide_controllers {
     void DepthController::execute(const std::shared_ptr<GoalHandle> goal_handle) {
         RCLCPP_INFO(get_node()->get_logger(), "Executing goal");
 
-        rclcpp::Time starting_time_ = get_node()->get_clock()->now();
+        starting_time_ = get_node()->get_clock()->now().seconds();
 
         rclcpp::Rate loop_rate(10);
 
@@ -170,16 +170,14 @@ namespace riptide_controllers {
                 alpha = K_fin_ * (K_inf_ * std::atan(depth_error_ / r_) * 2. / M_PI - euler_angles_[1]);
 
                 // Time
-                rclcpp::Duration elapsed_time = get_node()->get_clock()->now() - starting_time_;
-                feedback->elapsed_time.sec = elapsed_time.seconds();
-                feedback->elapsed_time.nanosec = elapsed_time.nanoseconds();
+                double elapsed_time = get_node()->get_clock()->now().seconds() - starting_time_;
+                feedback->elapsed_time = elapsed_time;
 
                 // Check if the goal is canceled
                 if (goal_handle->is_canceling()) {
                     running_ = false;
                     result_->depth = current_depth_;
-                    result->elapsed_time.sec = elapsed_time.seconds();
-                    result->elapsed_time.nanosec = elapsed_time.nanoseconds();
+                    result->elapsed_time= elapsed_time;
                     goal_handle->canceled(result_);
                     RCLCPP_INFO(get_node()->get_logger(), "Goal canceled");
                 }
@@ -191,16 +189,15 @@ namespace riptide_controllers {
                 // Check if the goal is depth validated
                 // TODO put 0.25 as parameter
                 if (std::abs(feedback->depth_error) < 0.25 && !reached_flag_) {
-                    rclcpp::Time reaching_time_ = get_node()->get_clock()->now();
+                    reaching_time_ = get_node()->get_clock()->now().seconds();
                     reached_flag_ = true;
                 }
 
                 // Check duration
-                if (rclcpp::Duration(goal->duration) > elapsed_time) {
+                if (goal->duration > elapsed_time) {
                     running_ = false;
                     result_->depth = current_depth_;
-                    result->elapsed_time.sec = elapsed_time.seconds();
-                    result->elapsed_time.nanosec = elapsed_time.nanoseconds();
+                    result->elapsed_time = elapsed_time;
 
                     if (reached_flag_) {
                         goal_handle->succeed(result_);

@@ -184,7 +184,7 @@ namespace riptide_controllers {
 
                 // Publish feedback
                 goal_handle->publish_feedback(feedback);
-                RCLCPP_INFO(get_node()->get_logger(), "Publish Feedback");
+                RCLCPP_INFO(get_node()->get_logger(), "Publish Feedback: [%f, %f]", depth_error_, elapsed_time);
 
                 // Check if the goal is depth validated
                 // TODO put 0.25 as parameter

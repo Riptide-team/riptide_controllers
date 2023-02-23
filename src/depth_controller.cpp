@@ -106,8 +106,10 @@ namespace riptide_controllers {
 
         error_ = requested_depth_ - current_depth_;
 
+        double K_inf = M_PI / 6.;
+        double r = 0.8;
+        double alpha = K_inf * std::atan(error_ / r) * 2. / M_PI;
         double u0 = params_.thruster_velocity;
-        double alpha = std::atan(error_);
         command_interfaces_[0].set_value(u0);
         command_interfaces_[1].set_value(alpha);
         command_interfaces_[2].set_value(-alpha);
@@ -137,7 +139,7 @@ namespace riptide_controllers {
     void DepthController::execute(const std::shared_ptr<GoalHandleDepth> goal_handle) {
         RCLCPP_INFO(get_node()->get_logger(), "Executing goal");
 
-        rclcpp::Rate loop_rate(10);
+        rclcpp::Rate loop_rate(5);
 
         double current_depth;
         const auto goal = goal_handle->get_goal();

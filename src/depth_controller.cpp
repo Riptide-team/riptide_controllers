@@ -66,6 +66,9 @@ namespace riptide_controllers {
         K_fin_ = params_.K_fin;
         r_ = params_.r;
 
+
+        RCLCPP_INFO(get_node()->get_logger(), "Parameters: %f, %f, %f %f", params_.thruster_velocity, K_inf_, K_fin_, r_);
+
         RCLCPP_DEBUG(get_node()->get_logger(), "configure successful");
         return CallbackReturn::SUCCESS;
     }

@@ -159,6 +159,7 @@ namespace riptide_controllers {
         auto feedback = std::make_shared<Action::Feedback>();
         auto result = std::make_shared<Action::Result>();
 
+        running_ = true;
         reached_flag_ = false;
         starting_time_ = get_node()->get_clock()->now().seconds();
 

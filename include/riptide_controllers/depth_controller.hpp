@@ -60,7 +60,8 @@ namespace riptide_controllers {
             double requested_depth_;
 
             double current_depth_;
-            Eigen::Vector3d euler_angles_; // yaw = euler[0]; pitch = euler[1]; roll = euler[2]
+            // Eigen::Vector3d euler_angles_; // yaw = euler[0]; pitch = euler[1]; roll = euler[2]
+            double pitch_;
 
             double depth_error_;
 

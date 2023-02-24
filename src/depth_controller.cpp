@@ -88,10 +88,7 @@ namespace riptide_controllers {
         state_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
         std::string prefix = std::string(get_node()->get_namespace()).substr(1);
         state_interfaces_config.names.push_back(prefix + "_" + params_.pressure_name + "/depth");
-        std::vector<std::string> coords = {"x", "y", "z", "w"};
-        for (const auto &c: coords) {
-            state_interfaces_config.names.push_back(prefix + "_" + params_.imu_name + "/orientation." + c);
-        }
+        state_interfaces_config.names.push_back(prefix + "_" + params_.imu_name + "/linear_acceleration.x");
         return state_interfaces_config;
     }
 
@@ -113,8 +110,7 @@ namespace riptide_controllers {
         std::lock_guard<std::mutex> lock_(depth_mutex_);
         current_depth_ = state_interfaces_[0].get_value();
 
-        auto q = Eigen::Quaterniond(state_interfaces_[4].get_value(), state_interfaces_[1].get_value(), state_interfaces_[2].get_value(), state_interfaces_[3].get_value());
-        euler_angles_ = q.toRotationMatrix().eulerAngles(0, 1, 2);
+        pitch_ = std::asin(state_interfaces_[1].get_value() / 9.8);
 
         if (running_) {
             command_interfaces_[0].set_value(params_.thruster_velocity);
@@ -172,7 +168,7 @@ namespace riptide_controllers {
                 feedback->depth_error = depth_error_;
 
                 // Command creating
-                alpha = K_fin_ * (K_inf_ * std::atan(depth_error_ / r_) * 2. / M_PI - euler_angles_[1]);
+                alpha = K_fin_ * (K_inf_ * std::atan(depth_error_ / r_) * 2. / M_PI - pitch_);
 
                 // Time
                 double elapsed_time = get_node()->get_clock()->now().seconds() - starting_time_;

@@ -196,7 +196,7 @@ namespace riptide_controllers {
                 }
 
                 // Check duration
-                if (goal->duration > elapsed_time) {
+                if (goal->duration < elapsed_time) {
                     running_ = false;
                     result_->depth = current_depth_;
                     result->elapsed_time = elapsed_time;

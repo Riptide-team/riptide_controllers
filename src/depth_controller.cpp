@@ -150,13 +150,14 @@ namespace riptide_controllers {
     void DepthController::execute(const std::shared_ptr<GoalHandle> goal_handle) {
         RCLCPP_INFO(get_node()->get_logger(), "Executing goal");
 
-        starting_time_ = get_node()->get_clock()->now().seconds();
-
         rclcpp::Rate loop_rate(10);
 
         auto goal = goal_handle->get_goal();
         auto feedback = std::make_shared<Action::Feedback>();
         auto result = std::make_shared<Action::Result>();
+
+        reached_flag_ = false;
+        starting_time_ = get_node()->get_clock()->now().seconds();
 
         while (rclcpp::ok()) {
             {
@@ -177,13 +178,14 @@ namespace riptide_controllers {
                 if (goal_handle->is_canceling()) {
                     running_ = false;
                     result_->depth = current_depth_;
-                    result->elapsed_time= elapsed_time;
+                    result->elapsed_time = elapsed_time;
                     goal_handle->canceled(result_);
                     RCLCPP_INFO(get_node()->get_logger(), "Goal canceled");
                 }
 
                 // Publish feedback
                 goal_handle->publish_feedback(feedback);
+                RCLCPP_INFO(get_node()->get_logger(), "Goal Duration: %f, %f", requested_depth_, duration_);
                 RCLCPP_INFO(get_node()->get_logger(), "Publish Feedback: [%f, %f]", depth_error_, elapsed_time);
 
                 // Check if the goal is depth validated

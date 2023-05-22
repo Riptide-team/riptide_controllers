@@ -66,6 +66,7 @@ list(APPEND broadcaster_controllers
     src/broadcasters/riptide_battery_card_broadcaster.cpp
     src/broadcasters/riptide_imu_broadcaster.cpp
     src/broadcasters/riptide_actuators_broadcaster.cpp
+    src/broadcasters/riptide_tail_broadcaster.cpp
 )
 
 # Compile broadcaster library

@@ -1,0 +1,45 @@
+riptide_tail_broadcaster:
+  d_joint: {
+    type: string,
+    description: "Specifies which joints will be used by the controller for the d fin.",
+    read_only: true
+  }
+  p_joint: {
+    type: string,
+    description: "Specifies which joints will be used by the controller for the p fin.",
+    read_only: true
+  }
+  s_joint: {
+    type: string,
+    description: "Specifies which joints will be used by the controller for the s fin.",
+    read_only: true
+  }
+  thruster_joint: {
+    type: string,
+    description: "Specifies which joints will be used by the controller for the thruster.",
+    read_only: true
+  }
+  actuators_topic_name: {
+    type: string,
+    default_value: "~/actuators_status",
+    description: "Specifies the topic on which are published actuators data.",
+    read_only: true
+  }
+  rc_name: {
+    type: string,
+    default_value: "rc",
+    description: "Specifies the RC name used in hardware component.",
+    read_only: true
+  }
+  rc_topic_name: {
+    type: string,
+    default_value: "~/rc_status",
+    description: "Specifies the topic on which are published rc data.",
+    read_only: true
+  }
+  rc_channels: {
+    type: string_array,
+    default_value: ["ch1", "ch2", "ch3", "ch4", "ch5", "ch6"],
+    description: "Specifies RC channels broadcasted.",
+    read_only: true
+  }

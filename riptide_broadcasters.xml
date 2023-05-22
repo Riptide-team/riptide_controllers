@@ -19,4 +19,9 @@
             Riptide actuators broadcaster
         </description>
     </class>
+    <class name="riptide_broadcasters/TailBroadcaster" type="riptide_broadcasters::TailBroadcaster"  base_class_type="controller_interface::ControllerInterface">
+        <description>
+            Riptide tail broadcaster
+        </description>
+    </class>
 </library>

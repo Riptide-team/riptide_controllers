@@ -75,10 +75,8 @@ namespace riptide_broadcasters {
             return CallbackReturn::ERROR;
         }
 
-        // Rsizing the Joy axes array
-        if (realtime_rc_publisher_ && realtime_rc_publisher_->trylock()) {
-            realtime_rc_publisher_->msg_.axes.resize(params_.rc_channels.size());
-        }
+        // Resizing the Joy axes array
+        realtime_rc_publisher_->msg_.axes.resize(params_.rc_channels.size());
         
         RCLCPP_DEBUG(get_node()->get_logger(), "configure successful");
         return CallbackReturn::SUCCESS;

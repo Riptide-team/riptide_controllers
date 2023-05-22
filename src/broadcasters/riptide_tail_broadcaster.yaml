@@ -43,3 +43,15 @@ riptide_tail_broadcaster:
     description: "Specifies RC channels broadcasted.",
     read_only: true
   }
+  multiplexer_name: {
+    type: string,
+    default_value: "multiplexer",
+    description: "Specifies the RC name used in hardware component.",
+    read_only: true
+  }
+  multiplexer_topic_name: {
+    type: string,
+    default_value: "~/multiplexer_status",
+    description: "Specifies the topic on which are published multiplexer data.",
+    read_only: true
+  }

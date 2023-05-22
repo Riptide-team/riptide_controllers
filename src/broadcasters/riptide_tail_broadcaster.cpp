@@ -9,6 +9,7 @@
 #include "realtime_tools/realtime_buffer.h"
 
 #include <riptide_msgs/msg/actuators.hpp>
+#include <riptide_msgs/msg/multiplexer.hpp>
 
 #include <string>
 #include <eigen3/Eigen/Dense>
@@ -77,6 +78,18 @@ namespace riptide_broadcasters {
 
         // Resizing the Joy axes array
         realtime_rc_publisher_->msg_.axes.resize(params_.rc_channels.size());
+
+         // Multiplexer publisher
+        try {
+            // register ft sensor data publisher
+            multiplexer_publisher_ = get_node()->create_publisher<MultiplexerMsg>(params_.multiplexer_topic_name.c_str(), rclcpp::SystemDefaultsQoS());
+            realtime_multiplexer_publisher_ = std::make_shared<realtime_tools::RealtimePublisher<MultiplexerMsg>>(multiplexer_publisher_);
+            RCLCPP_INFO(get_node()->get_logger(), "Publishing status on %s", params_.multiplexer_topic_name.c_str());
+        }
+        catch (const std::exception & e) {
+            RCLCPP_FATAL(get_node()->get_logger(), "Exception thrown during publisher creation at configure stage with message : %s", e.what());
+            return CallbackReturn::ERROR;
+        }
         
         RCLCPP_DEBUG(get_node()->get_logger(), "configure successful");
         return CallbackReturn::SUCCESS;
@@ -135,9 +148,19 @@ namespace riptide_broadcasters {
 
             // Data
             for (std::size_t i=0; i<(realtime_rc_publisher_->msg_).axes.size(); ++i) {
-                realtime_rc_publisher_->msg_.axes[i] = state_interfaces_[i].get_value();
+                realtime_rc_publisher_->msg_.axes[i] = state_interfaces_[i+4].get_value();
             }
             realtime_rc_publisher_->unlockAndPublish();
+        }
+
+        if (realtime_multiplexer_publisher_ && realtime_multiplexer_publisher_->trylock()) {
+            // Header
+            realtime_multiplexer_publisher_->msg_.header.stamp = get_node()->now();
+
+            // Data
+            realtime_multiplexer_publisher_->msg_.automatic = (state_interfaces_[10].get_value()>0.5 ? true : false);
+            realtime_multiplexer_publisher_->msg_.remaining_time = state_interfaces_[11].get_value();
+            realtime_multiplexer_publisher_->unlockAndPublish();
         }
 
         return controller_interface::return_type::OK;

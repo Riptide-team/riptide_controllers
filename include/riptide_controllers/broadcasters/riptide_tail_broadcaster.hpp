@@ -5,6 +5,7 @@
 #include <string>
 
 #include <riptide_msgs/msg/actuators.hpp>
+#include <riptide_msgs/msg/multiplexer.hpp>
 #include <sensor_msgs/msg/joy.hpp>
 #include <realtime_tools/realtime_publisher.h>
 
@@ -16,6 +17,7 @@ namespace riptide_broadcasters {
 
             using ActuatorMsg = riptide_msgs::msg::Actuators;
             using RCMsg = sensor_msgs::msg::Joy;
+            using MultiplexerMsg = riptide_msgs::msg::Multiplexer;
 
             TailBroadcaster();
 
@@ -44,6 +46,10 @@ namespace riptide_broadcasters {
             // RC publisher
             std::shared_ptr<rclcpp::Publisher<RCMsg>> rc_publisher_ = nullptr;
             std::shared_ptr<realtime_tools::RealtimePublisher<RCMsg>> realtime_rc_publisher_ = nullptr;
+
+            // Multiplexer publisher
+            std::shared_ptr<rclcpp::Publisher<MultiplexerMsg>> multiplexer_publisher_ = nullptr;
+            std::shared_ptr<realtime_tools::RealtimePublisher<MultiplexerMsg>> realtime_multiplexer_publisher_ = nullptr;
     };
 
 } // riptide_broadcasters

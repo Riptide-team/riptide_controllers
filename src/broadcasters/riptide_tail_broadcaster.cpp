@@ -138,7 +138,6 @@ namespace riptide_broadcasters {
                 realtime_rc_publisher_->msg_.axes[i] = state_interfaces_[i].get_value();
             }
             realtime_rc_publisher_->unlockAndPublish();
-            RCLCPP_INFO(get_node()->get_logger(), "Publishing %f", state_interfaces_[0].get_value());
         }
 
         return controller_interface::return_type::OK;

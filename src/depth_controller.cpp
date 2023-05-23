@@ -51,6 +51,7 @@ namespace riptide_controllers {
             return CallbackReturn::ERROR;
         }
 
+        // Init Depth action
         feedback_ = std::make_shared<Action::Feedback>();
         result_ = std::make_shared<Action::Result>();
 
@@ -66,6 +67,17 @@ namespace riptide_controllers {
         K_fin_ = params_.K_fin;
         r_ = params_.r;
 
+        // Init Immersion action
+        immerse_feedback_ = std::make_shared<ImmerseAction::Feedback>();
+        immerse_result_ = std::make_shared<ImmerseAction::Result>();
+
+        immerse_action_server_ = rclcpp_action::create_server<ImmerseAction>(
+            get_node(),
+            "immerse",
+            std::bind(&DepthController::immerse_handle_goal, this, std::placeholders::_1, std::placeholders::_2),
+            std::bind(&DepthController::immerse_handle_cancel, this, std::placeholders::_1),
+            std::bind(&DepthController::immerse_handle_accepted, this, std::placeholders::_1)
+        );
 
         RCLCPP_INFO(get_node()->get_logger(), "Parameters: %f, %f, %f %f", params_.thruster_velocity, K_inf_, K_fin_, r_);
 
@@ -112,10 +124,15 @@ namespace riptide_controllers {
 
         pitch_ = std::asin(state_interfaces_[1].get_value() / 9.8);
 
-        if (running_) {
+        if (mode_ == "DEPTH") {
             command_interfaces_[0].set_value(params_.thruster_velocity);
             command_interfaces_[1].set_value(alpha);
             command_interfaces_[2].set_value(-alpha);
+        }
+        else if (mode_ == "IMMERSE") {
+            command_interfaces_[0].set_value(requested_velocity_);
+            command_interfaces_[1].set_value(-alpha);
+            command_interfaces_[2].set_value(alpha);
         }
         else {
             command_interfaces_[0].set_value(0.);
@@ -155,7 +172,7 @@ namespace riptide_controllers {
         auto feedback = std::make_shared<Action::Feedback>();
         auto result = std::make_shared<Action::Result>();
 
-        running_ = true;
+        mode_ = "DEPTH";
         reached_flag_ = false;
         starting_time_ = get_node()->get_clock()->now().seconds();
 
@@ -176,7 +193,7 @@ namespace riptide_controllers {
 
                 // Check if the goal is canceled
                 if (goal_handle->is_canceling()) {
-                    running_ = false;
+                    mode_ = "IDLE";
                     result_->depth = current_depth_;
                     result->elapsed_time = elapsed_time;
                     goal_handle->canceled(result_);
@@ -197,7 +214,7 @@ namespace riptide_controllers {
 
                 // Check duration
                 if (goal->duration < elapsed_time) {
-                    running_ = false;
+                    mode_ = "IDLE";
                     result_->depth = current_depth_;
                     result->elapsed_time = elapsed_time;
 
@@ -206,6 +223,101 @@ namespace riptide_controllers {
                     }
                     else {
                         goal_handle->abort(result_);
+                    }
+                    break;
+                }
+            } // mutex scope
+
+            // Loop rate
+            loop_rate.sleep();
+        }
+    }
+
+
+
+
+    rclcpp_action::GoalResponse DepthController::immerse_handle_goal(const rclcpp_action::GoalUUID & uuid, std::shared_ptr<const ImmerseAction::Goal> goal) {
+        std::lock_guard<std::mutex> lock_(immerse_mutex_);
+        requested_duration_ = goal->duration;
+        requested_depth_ = goal->depth;
+        requested_velocity_ = goal->velocity;
+        requested_pitch_ = goal->pitch;
+        RCLCPP_INFO(get_node()->get_logger(), "Action Immersion: d=%fm, t=%fs, v=%f, a=%f", requested_depth_, duration_, requested_velocity_, requested_pitch_);
+        (void)uuid;
+        return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
+    }
+
+    rclcpp_action::CancelResponse DepthController::immerse_handle_cancel(const std::shared_ptr<ImmerseGoalHandle> goal_handle) {
+        RCLCPP_INFO(get_node()->get_logger(), "Received request to cancel goal");
+        (void)goal_handle;
+        return rclcpp_action::CancelResponse::ACCEPT;
+    }
+
+    void DepthController::immerse_handle_accepted(const std::shared_ptr<ImmerseGoalHandle> goal_handle) {
+        RCLCPP_INFO(get_node()->get_logger(), "Handle accepted");
+        std::thread{std::bind(&DepthController::immerse_execute, this, std::placeholders::_1), goal_handle}.detach();
+    }
+
+    void DepthController::immerse_execute(const std::shared_ptr<ImmerseGoalHandle> goal_handle) {
+        RCLCPP_INFO(get_node()->get_logger(), "Executing goal");
+
+        rclcpp::Rate loop_rate(10);
+
+        auto goal = goal_handle->get_goal();
+        auto feedback = std::make_shared<ImmerseAction::Feedback>();
+        auto result = std::make_shared<ImmerseAction::Result>();
+
+        mode_ = "IMMERSE";
+        reached_flag_ = false;
+        starting_time_ = get_node()->get_clock()->now().seconds();
+
+        while (rclcpp::ok()) {
+            {
+                std::lock_guard<std::mutex> lock_(depth_mutex_);
+
+                // Variables getting
+                depth_error_ = current_depth_ - requested_depth_;
+                feedback->depth_error = depth_error_;
+
+                // Command creating
+                alpha = K_fin_ * (K_inf_ * std::atan(depth_error_ / r_) * 2. / M_PI - pitch_);
+
+                // Time
+                double elapsed_time = get_node()->get_clock()->now().seconds() - starting_time_;
+                feedback->remaining_time = elapsed_time;
+
+                // Check if the goal is canceled
+                if (goal_handle->is_canceling()) {
+                    mode_ = "IDLE";
+                    immerse_result_->final_depth = current_depth_;
+                    immerse_result_->final_duration = elapsed_time;
+                    goal_handle->canceled(immerse_result_);
+                    RCLCPP_INFO(get_node()->get_logger(), "Goal canceled");
+                }
+
+                // Publish feedback
+                goal_handle->publish_feedback(feedback);
+                RCLCPP_INFO(get_node()->get_logger(), "Goal Duration: %f, %f", requested_depth_, duration_);
+                RCLCPP_INFO(get_node()->get_logger(), "Publish Feedback: [%f, %f]", depth_error_, elapsed_time);
+
+                // Check if the goal is depth validated
+                // TODO put 0.25 as parameter
+                if (std::abs(feedback->depth_error) < 0.25 && !reached_flag_) {
+                    reaching_time_ = get_node()->get_clock()->now().seconds();
+                    reached_flag_ = true;
+                }
+
+                // Check duration
+                if (goal->duration < elapsed_time) {
+                    mode_ = "IDLE";
+                    immerse_result_->final_depth = current_depth_;
+                    result->final_duration = elapsed_time;
+
+                    if (reached_flag_) {
+                        goal_handle->succeed(immerse_result_);
+                    }
+                    else {
+                        goal_handle->abort(immerse_result_);
                     }
                     break;
                 }

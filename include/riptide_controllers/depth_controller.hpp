@@ -3,6 +3,7 @@
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <controller_interface/controller_interface.hpp>
 #include "riptide_msgs/action/depth.hpp"
+#include "riptide_msgs/action/immerse.hpp"
 #include "depth_controller_parameters.hpp"
 
 #include <memory>
@@ -18,6 +19,9 @@ namespace riptide_controllers {
 
             using Action = riptide_msgs::action::Depth;
             using GoalHandle = rclcpp_action::ServerGoalHandle<Action>;
+
+            using ImmerseAction = riptide_msgs::action::Immerse;
+            using ImmerseGoalHandle = rclcpp_action::ServerGoalHandle<ImmerseAction>;
 
             DepthController() : controller_interface::ControllerInterface() {};
 
@@ -37,16 +41,11 @@ namespace riptide_controllers {
 
         private:
 
-            // Action server
-            rclcpp_action::Server<riptide_msgs::action::Depth>::SharedPtr action_server_;
+            // Parameters
+            std::shared_ptr<depth_controller::ParamListener> param_listener_;
+            depth_controller::Params params_;
 
-            rclcpp_action::GoalResponse handle_goal(const rclcpp_action::GoalUUID & uuid, std::shared_ptr<const Action::Goal> goal);
-
-            rclcpp_action::CancelResponse handle_cancel(const std::shared_ptr<GoalHandle> goal_handle);
-
-            void handle_accepted(const std::shared_ptr<GoalHandle> goal_handle);
-
-            void execute(const std::shared_ptr<GoalHandle> goal_handle);
+            std::string mode_ = "IDLE";
 
             // Depth control
             double alpha;
@@ -69,15 +68,50 @@ namespace riptide_controllers {
             double reaching_time_;
             bool reached_flag_;
 
-            bool running_;
+            // bool running_;
+
+
+
+            // Action server
+            rclcpp_action::Server<riptide_msgs::action::Depth>::SharedPtr action_server_;
+
+            rclcpp_action::GoalResponse handle_goal(const rclcpp_action::GoalUUID & uuid, std::shared_ptr<const Action::Goal> goal);
+
+            rclcpp_action::CancelResponse handle_cancel(const std::shared_ptr<GoalHandle> goal_handle);
+
+            void handle_accepted(const std::shared_ptr<GoalHandle> goal_handle);
+
+            void execute(const std::shared_ptr<GoalHandle> goal_handle);
 
             // Action handle
             std::shared_ptr<Action::Feedback> feedback_;
             std::shared_ptr<Action::Result> result_;
 
-            // Parameters
-            std::shared_ptr<depth_controller::ParamListener> param_listener_;
-            depth_controller::Params params_;
+
+
+            // Immerse Action server
+            rclcpp_action::Server<riptide_msgs::action::Immerse>::SharedPtr immerse_action_server_;
+
+            rclcpp_action::GoalResponse immerse_handle_goal(const rclcpp_action::GoalUUID & uuid, std::shared_ptr<const ImmerseAction::Goal> goal);
+
+            rclcpp_action::CancelResponse immerse_handle_cancel(const std::shared_ptr<ImmerseGoalHandle> goal_handle);
+
+            void immerse_handle_accepted(const std::shared_ptr<ImmerseGoalHandle> goal_handle);
+
+            void immerse_execute(const std::shared_ptr<ImmerseGoalHandle> goal_handle);
+
+            // Immerse Action handle
+            std::shared_ptr<ImmerseAction::Feedback> immerse_feedback_;
+            std::shared_ptr<ImmerseAction::Result> immerse_result_;
+
+            // Mutex for immersion
+            std::mutex immerse_mutex_;
+
+            // Immersion data
+            double requested_duration_;
+            // double requested_depth_;
+            double requested_velocity_;
+            double requested_pitch_;
     };
 
 } // riptide_controllers

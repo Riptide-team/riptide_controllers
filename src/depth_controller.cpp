@@ -189,6 +189,8 @@ namespace riptide_controllers {
 		        double thetab = (pitch_ - K_inf_ * std::atan(depth_error_ / r_) * 2. / M_PI);
                 alpha = K_fin_ * std::atan(2 *std::atan(std::tan(thetab/2)) / r_fin_) * 2. / M_PI;
 
+                RCLCPP_INFO(get_node()->get_logger(), "pitch=%f pitch_error=%f alpha=%f", pitch_, thetab, alpha);
+
                 // Time
                 double elapsed_time = get_node()->get_clock()->now().seconds() - starting_time_;
                 feedback->elapsed_time = elapsed_time;

@@ -185,7 +185,8 @@ namespace riptide_controllers {
                 feedback->depth_error = depth_error_;
 
                 // Command creating
-                alpha = K_fin_ * (K_inf_ * std::atan(depth_error_ / r_) * 2. / M_PI - pitch_);
+		double thetab = (pitch_ - K_inf_ * std::atan(depth_error_ / r_) * 2. / M_PI);
+                alpha = K_fin_ * 2 *std::atan(std::tan(thetab/2));
 
                 // Time
                 double elapsed_time = get_node()->get_clock()->now().seconds() - starting_time_;

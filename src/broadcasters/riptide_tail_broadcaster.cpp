@@ -144,7 +144,7 @@ namespace riptide_broadcasters {
             realtime_actuators_publisher_->msg_.p_fin = state_interfaces_[2].get_value();
             realtime_actuators_publisher_->msg_.s_fin = state_interfaces_[3].get_value();
 
-            RCLCPP_INFO(get_node()->get_logger(), "%f %f %f %f", state_interfaces_[0].get_value(), state_interfaces_[1].get_value(), state_interfaces_[2].get_value(), state_interfaces_[3].get_value());
+            RCLCPP_DEBUG(get_node()->get_logger(), "%f %f %f %f", state_interfaces_[0].get_value(), state_interfaces_[1].get_value(), state_interfaces_[2].get_value(), state_interfaces_[3].get_value());
             realtime_actuators_publisher_->unlockAndPublish();
         }
 

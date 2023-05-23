@@ -45,6 +45,12 @@ depth_controller:
   K_fin: {
     type: double,
     default_value: 1.,
-    description: "Specifies the proportianal factor for the fin regulation",
+    description: "Specifies the proportional infinite factor for the fin regulation",
+    read_only: true
+  }
+  Range_fin: {
+    type: double,
+    default_value: 1.,
+    description: "Specifies the fin regulation corridor",
     read_only: true
   }

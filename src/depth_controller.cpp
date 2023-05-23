@@ -65,6 +65,7 @@ namespace riptide_controllers {
 
         K_inf_ = params_.K_inf;
         K_fin_ = params_.K_fin;
+        r_fin_ = params_.Range_fin;
         r_ = params_.r;
 
         // Init Immersion action
@@ -186,7 +187,7 @@ namespace riptide_controllers {
 
                 // Command creating
 		        double thetab = (pitch_ - K_inf_ * std::atan(depth_error_ / r_) * 2. / M_PI);
-                alpha = K_fin_ * 2 *std::atan(std::tan(thetab/2));
+                alpha = K_fin_ * std::atan(2 *std::atan(std::tan(thetab/2)) / r_fin_) * 2. / M_PI;
 
                 // Time
                 double elapsed_time = get_node()->get_clock()->now().seconds() - starting_time_;

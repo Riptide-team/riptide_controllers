@@ -51,6 +51,7 @@ namespace riptide_controllers {
             double alpha;
             double K_inf_;
             double K_fin_;
+            double r_fin_;
             double r_;
 
             std::mutex depth_mutex_;

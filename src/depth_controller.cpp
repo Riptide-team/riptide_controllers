@@ -123,7 +123,7 @@ namespace riptide_controllers {
         std::lock_guard<std::mutex> lock_(depth_mutex_);
         current_depth_ = state_interfaces_[0].get_value();
 
-        pitch_ = std::asin(state_interfaces_[1].get_value() / 9.8);
+        pitch_ = - std::asin(state_interfaces_[1].get_value() / 9.8);
 
         if (mode_ == "DEPTH") {
             command_interfaces_[0].set_value(params_.thruster_velocity);

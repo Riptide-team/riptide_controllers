@@ -127,13 +127,13 @@ namespace riptide_controllers {
 
         if (mode_ == "DEPTH") {
             command_interfaces_[0].set_value(params_.thruster_velocity);
-            command_interfaces_[1].set_value(-alpha);
-            command_interfaces_[2].set_value(alpha);
+            command_interfaces_[1].set_value(alpha);
+            command_interfaces_[2].set_value(-alpha);
         }
         else if (mode_ == "IMMERSE") {
             command_interfaces_[0].set_value(requested_velocity_);
-            command_interfaces_[1].set_value(alpha);
-            command_interfaces_[2].set_value(-alpha);
+            command_interfaces_[1].set_value(-alpha);
+            command_interfaces_[2].set_value(alpha);
         }
         else {
             command_interfaces_[0].set_value(0.);

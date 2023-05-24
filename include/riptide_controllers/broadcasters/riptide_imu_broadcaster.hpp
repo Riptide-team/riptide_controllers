@@ -6,6 +6,7 @@
 
 #include "realtime_tools/realtime_publisher.h"
 #include <sensor_msgs/msg/imu.hpp>
+#include <sensor_msgs/msg/magnetic_field.hpp>
 
 namespace riptide_broadcasters {
 
@@ -13,6 +14,7 @@ namespace riptide_broadcasters {
         public:
 
             using Msg = sensor_msgs::msg::Imu;
+            using MagneticMsg = sensor_msgs::msg::MagneticField;
 
             ImuBroadcaster();
 
@@ -34,9 +36,13 @@ namespace riptide_broadcasters {
             std::shared_ptr<riptide_imu_broadcaster::ParamListener> param_listener_;
             riptide_imu_broadcaster::Params params_;
 
-            // Pressure publisher
+            // Imu publisher
             std::shared_ptr<rclcpp::Publisher<Msg>> imu_publisher_ = nullptr;
             std::shared_ptr<realtime_tools::RealtimePublisher<Msg>> realtime_imu_publisher_ = nullptr;
+
+            // Magnetic publisher
+            std::shared_ptr<rclcpp::Publisher<MagneticMsg>> magnetic_publisher_ = nullptr;
+            std::shared_ptr<realtime_tools::RealtimePublisher<MagneticMsg>> realtime_magnetic_publisher_ = nullptr;
     };
 
 } // riptide_testers

@@ -9,3 +9,8 @@ riptide_imu_broadcaster:
     default_value: "~/imu_status",
     description: "Name of the published topic.",
   }
+  magnetic_topic: {
+    type: string,
+    default_value: "~/magnetic_status",
+    description: "Name of the published topic for magnetometer measurements.",
+  }

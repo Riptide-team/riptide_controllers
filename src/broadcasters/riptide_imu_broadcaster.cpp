@@ -13,6 +13,7 @@
 #include <cmath>
 
 #include <sensor_msgs/msg/imu.hpp>
+#include <sensor_msgs/msg/magnetic_field.hpp>
 
 
 namespace riptide_broadcasters {
@@ -43,12 +44,22 @@ namespace riptide_broadcasters {
 
         RCLCPP_INFO(get_node()->get_logger(), "Params sensor name %s", params_.sensor_name.c_str());
 
-        // Publisher
+        // Imu Publisher
         try {
-            // register ft sensor data publisher
             imu_publisher_ = get_node()->create_publisher<Msg>(params_.topic.c_str(), rclcpp::SystemDefaultsQoS());
             realtime_imu_publisher_ = std::make_shared<realtime_tools::RealtimePublisher<Msg>>(imu_publisher_);
             RCLCPP_INFO(get_node()->get_logger(), "Publishing status on %s", params_.topic.c_str());
+        }
+        catch (const std::exception & e) {
+            RCLCPP_FATAL(get_node()->get_logger(), "Exception thrown during publisher creation at configure stage with message : %s", e.what());
+            return CallbackReturn::ERROR;
+        }
+
+        // Magnetic Publisher
+        try {
+            magnetic_publisher_ = get_node()->create_publisher<MagneticMsg>(params_.magnetic_topic.c_str(), rclcpp::SystemDefaultsQoS());
+            realtime_magnetic_publisher_ = std::make_shared<realtime_tools::RealtimePublisher<MagneticMsg>>(magnetic_publisher_);
+            RCLCPP_INFO(get_node()->get_logger(), "Publishing status on %s", params_.magnetic_topic.c_str());
         }
         catch (const std::exception & e) {
             RCLCPP_FATAL(get_node()->get_logger(), "Exception thrown during publisher creation at configure stage with message : %s", e.what());
@@ -77,6 +88,11 @@ namespace riptide_broadcasters {
             }
         }
         state_interfaces_config.names.push_back(prefix + "_" + params_.sensor_name + "/orientation.w");
+
+        // Adding magnetic field
+        for (const auto &c: coords) {
+            state_interfaces_config.names.push_back(prefix + "_" + params_.sensor_name + "/magnetic." + c);
+        }
         return state_interfaces_config;
     }
 
@@ -108,6 +124,18 @@ namespace riptide_broadcasters {
             realtime_imu_publisher_->msg_.orientation.w = state_interfaces_[9].get_value();
 
             realtime_imu_publisher_->unlockAndPublish();
+        }
+
+        if (realtime_magnetic_publisher_ && realtime_magnetic_publisher_->trylock()) {
+            // Header
+            realtime_magnetic_publisher_->msg_.header.stamp = get_node()->now();
+
+            // Data
+            realtime_magnetic_publisher_->msg_.magnetic_field.x = state_interfaces_[10].get_value();
+            realtime_magnetic_publisher_->msg_.magnetic_field.y = state_interfaces_[11].get_value();
+            realtime_magnetic_publisher_->msg_.magnetic_field.z = state_interfaces_[12].get_value();
+
+            realtime_magnetic_publisher_->unlockAndPublish();
         }
 
         return controller_interface::return_type::OK;

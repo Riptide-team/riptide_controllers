@@ -100,7 +100,7 @@ namespace riptide_controllers {
         state_interfaces_config.names.push_back(prefix + "_" + params_.pressure_name + "/depth");
 
         // Getting quaternion
-        std::vector<std::string> ifaces = {"quaternion"};
+        std::vector<std::string> ifaces = {"orientation"};
         std::vector<std::string> coords = {"x", "y", "z", "w"};
         for (const auto &iface: ifaces) {
             for (const auto &c: coords) {

@@ -259,4 +259,4 @@ namespace riptide_controllers {
 
 #include "pluginlib/class_list_macros.hpp"
 
-PLUGINLIB_EXPORT_CLASS(riptide_controllers::FullRiptideController, controller_interface::ControllerInterface)
+PLUGINLIB_EXPORT_CLASS(riptide_controllers::FullDepthController, controller_interface::ControllerInterface)

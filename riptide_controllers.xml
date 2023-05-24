@@ -19,7 +19,7 @@
             Riptide simple depth controller with a ballanced roll
         </description>
     </class>
-    <class name="riptide_controllers/FullRiptideController" type="riptide_controllers::FullRiptideController"  base_class_type="controller_interface::ControllerInterface">
+    <class name="riptide_controllers/FullDepthController" type="riptide_controllers::FullDepthController"  base_class_type="controller_interface::ControllerInterface">
         <description>
             Riptide full depth controller
         </description>

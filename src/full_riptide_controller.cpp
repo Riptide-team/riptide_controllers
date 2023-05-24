@@ -150,8 +150,8 @@ namespace riptide_controllers {
             Eigen::AngleAxisd yawAngle(goal->yaw, Eigen::Vector3d::UnitY());
             Eigen::AngleAxisd pitchAngle(pitch_w, Eigen::Vector3d::UnitX());
 
-            Eigen::Quaternion<double> q = rollAngle * yawAngle * pitchAngle;
-            Rw_ = q.matrix();
+            Eigen::Quaternion<double> qr = rollAngle * yawAngle * pitchAngle;
+            Rw_ = qr.matrix();
 
             // Rotation matrix desired to be applied on the Riptide
             Eigen::Vector3d w_ = SkewInv((R_.transpose() * Rw_).log());

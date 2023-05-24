@@ -146,8 +146,8 @@ namespace riptide_controllers {
             double pitch_w =  K_inf_ * std::atan((requested_depth_ - current_depth_) / r_) * 2. / M_PI;
 
             // Wanted rotation matrix computation
-            Eigen::AngleAxisd rollAngle(goal->roll, Eigen::Vector3d::UnitZ());
-            Eigen::AngleAxisd yawAngle(goal->yaw, Eigen::Vector3d::UnitY());
+            Eigen::AngleAxisd rollAngle(requested_roll_, Eigen::Vector3d::UnitZ());
+            Eigen::AngleAxisd yawAngle(requested_yaw_, Eigen::Vector3d::UnitY());
             Eigen::AngleAxisd pitchAngle(pitch_w, Eigen::Vector3d::UnitX());
 
             Eigen::Quaternion<double> qr = rollAngle * yawAngle * pitchAngle;
@@ -207,21 +207,22 @@ namespace riptide_controllers {
         reached_flag_ = false;
         starting_time_ = get_node()->get_clock()->now().seconds();
 
+        requested_roll_ = goal->roll;
+        requested_yaw_ = goal->yaw;
+        requested_depth_ = goal->depth;
+
         while (rclcpp::ok()) {
             {
                 std::lock_guard<std::mutex> lock_(depth_mutex_);
 
                 // Feedback message fill
                 feedback->remaining_time = starting_time_ + goal->duration - get_node()->get_clock()->now().seconds();
-                requested_depth_ = goal->depth;
                 depth_error_ = current_depth_ - requested_depth_;
                 feedback->depth_error = depth_error_;
                 Eigen::Vector3d ea = R_.eulerAngles(2, 1, 0);
                 feedback->yaw_error = ea(0);
                 feedback->pitch_error = ea(1);
                 feedback->roll_error = ea(2);
-
-                
 
                 // Check if the goal is canceled
                 if (goal_handle->is_canceling()) {

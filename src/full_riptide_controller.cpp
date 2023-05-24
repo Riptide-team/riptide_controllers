@@ -104,7 +104,7 @@ namespace riptide_controllers {
         std::vector<std::string> coords = {"x", "y", "z", "w"};
         for (const auto &iface: ifaces) {
             for (const auto &c: coords) {
-                state_interfaces_config.names.push_back(params_.imu_name + "/" + iface + "." + c);
+                state_interfaces_config.names.push_back(prefix + "_" + params_.imu_name + "/" + iface + "." + c);
             }
         }
         return state_interfaces_config;

@@ -146,11 +146,11 @@ namespace riptide_controllers {
             double pitch_w =  K_inf_ * std::atan((requested_depth_ - current_depth_) / r_) * 2. / M_PI;
 
             // Wanted rotation matrix computation
-            Eigen::AngleAxisd rollAngle(requested_roll_, Eigen::Vector3d::UnitZ());
-            Eigen::AngleAxisd yawAngle(requested_yaw_, Eigen::Vector3d::UnitY());
-            Eigen::AngleAxisd pitchAngle(pitch_w, Eigen::Vector3d::UnitX());
+            Eigen::AngleAxisd rollAngle(requested_roll_, Eigen::Vector3d::UnitX());
+            Eigen::AngleAxisd yawAngle(pitch_w, Eigen::Vector3d::UnitY());
+            Eigen::AngleAxisd pitchAngle(requested_yaw_, Eigen::Vector3d::UnitZ());
 
-            Eigen::Quaternion<double> qr = rollAngle * yawAngle * pitchAngle;
+            Eigen::Quaternion<double> qr = yawAngle * pitchAngle * rollAngle;
             Rw_ = qr.matrix();
 
             // Rotation matrix desired to be applied on the Riptide

@@ -19,6 +19,11 @@
             Riptide simple depth controller with a ballanced roll
         </description>
     </class>
+    <class name="riptide_controllers/FullRiptideController" type="riptide_controllers::FullRiptideController"  base_class_type="controller_interface::ControllerInterface">
+        <description>
+            Riptide full depth controller
+        </description>
+    </class>
     <class name="riptide_controllers/ActuatorsReset" type="riptide_controllers::ActuatorsReset"  base_class_type="controller_interface::ControllerInterface">
         <description>
             Riptide reset actuators controller

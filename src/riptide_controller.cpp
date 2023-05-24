@@ -10,6 +10,7 @@
 
 #include <string>
 #include <eigen3/Eigen/Dense>
+#include <unsupported/Eigen/MatrixFunctions>
 #include <cmath>
 
 namespace riptide_controllers {

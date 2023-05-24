@@ -142,6 +142,17 @@ namespace riptide_controllers {
             q.w() = state_interfaces_[4].get_value();
             R_ = q.normalized().toRotationMatrix();
 
+            // Computing the desired rotation matrix Rw_
+            double pitch_w =  K_inf_ * std::atan((requested_depth_ - current_depth_) / r_) * 2. / M_PI;
+
+            // Wanted rotation matrix computation
+            Eigen::AngleAxisd rollAngle(goal->roll, Eigen::Vector3d::UnitZ());
+            Eigen::AngleAxisd yawAngle(goal->yaw, Eigen::Vector3d::UnitY());
+            Eigen::AngleAxisd pitchAngle(pitch_w, Eigen::Vector3d::UnitX());
+
+            Eigen::Quaternion<double> q = rollAngle * yawAngle * pitchAngle;
+            Rw_ = q.matrix();
+
             // Rotation matrix desired to be applied on the Riptide
             Eigen::Vector3d w_ = SkewInv((R_.transpose() * Rw_).log());
 
@@ -202,21 +213,15 @@ namespace riptide_controllers {
 
                 // Feedback message fill
                 feedback->remaining_time = starting_time_ + goal->duration - get_node()->get_clock()->now().seconds();
-                feedback->depth_error = current_depth_ - goal->depth;
+                requested_depth_ = goal->depth;
+                depth_error_ = current_depth_ - requested_depth_;
+                feedback->depth_error = depth_error_;
                 Eigen::Vector3d ea = R_.eulerAngles(2, 1, 0);
                 feedback->yaw_error = ea(0);
                 feedback->pitch_error = ea(1);
                 feedback->roll_error = ea(2);
 
-                double pitch_w =  K_inf_ * std::atan(feedback->depth_error / r_) * 2. / M_PI;
-
-                // Wanted rotation matrix computation
-                Eigen::AngleAxisd rollAngle(goal->roll, Eigen::Vector3d::UnitZ());
-                Eigen::AngleAxisd yawAngle(goal->yaw, Eigen::Vector3d::UnitY());
-                Eigen::AngleAxisd pitchAngle(pitch_w, Eigen::Vector3d::UnitX());
-
-                Eigen::Quaternion<double> q = rollAngle * yawAngle * pitchAngle;
-                Rw_ = q.matrix();
+                
 
                 // Check if the goal is canceled
                 if (goal_handle->is_canceling()) {

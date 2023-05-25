@@ -181,6 +181,7 @@ namespace riptide_controllers {
             // Rotation matrix desired to be applied on the Riptide
             Eigen::Matrix3d R = R_.transpose() * Rw_;
             RCLCPP_INFO(get_node()->get_logger(), "R: %f, %f, %f | %f, %f, %f | %f, %f %f", R(0,0), R(0,1), R(0,2), R(1,0), R(1,1), R(1,2), R(2,0), R(2,1), R(2,2));
+            RCLCPP_INFO(get_node()->get_logger(), "Rw: %f, %f, %f | %f, %f, %f | %f, %f %f", Rw(0,0), Rw(0,1), Rw(0,2), Rw(1,0), Rw(1,1), Rw(1,2), Rw(2,0), Rw(2,1), Rw(2,2));
 
             Eigen::Matrix3d R2 = R.log();
             Eigen::Vector3d w_ = SkewInv(R2);

@@ -120,7 +120,7 @@ namespace riptide_controllers {
 
         // Getting quaternion
         std::vector<std::string> ifaces = {"orientation"};
-        std::vector<std::string> coords = {"x", "y", "z", "w"};
+        std::vector<std::string> coords = {"w", "x", "y", "z"};
         for (const auto &iface: ifaces) {
             for (const auto &c: coords) {
                 state_interfaces_config.names.push_back(prefix + "_" + params_.imu_name + "/" + iface + "." + c);

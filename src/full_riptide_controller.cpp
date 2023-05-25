@@ -182,6 +182,14 @@ namespace riptide_controllers {
             Eigen::Quaternion<double> qr = rollAngle * pitchAngle * yawAngle;
             qr.normalize();
 
+            double yaw, pitch, roll;
+            quaternion2euler(qr.w(), qr.x(), qr.y(), qr.z(), &roll, &pitch, &yaw);
+
+            std::cout << "yaw: \t"  << yaw * 180. / M_PI << std::endl;
+            std::cout << "pitch: \t" << pitch * 180. / M_PI <<  std::endl;
+            std::cout << "roll: \t"  << roll * 180. / M_PI <<  std::endl;
+            std::cout << std::endl;
+
 
             Rw_ = qr.toRotationMatrix(); // .normalized()
 

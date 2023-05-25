@@ -169,9 +169,9 @@ namespace riptide_controllers {
             RCLCPP_DEBUG(get_node()->get_logger(), "Angles %f, %f, %f", K_fin_ * std::atan( u_(0) / r_fin_) * 2. / M_PI, K_fin_ * std::atan( u_(1) / r_fin_) * 2. / M_PI, K_fin_ * std::atan( u_(2) / r_fin_) * 2. / M_PI);
         }
         else {
-            command_interfaces_[0].set_value(0.);
-            command_interfaces_[1].set_value(0.);
-            command_interfaces_[2].set_value(0.);
+            command_interfaces_[0].set_value(0.2);
+            command_interfaces_[1].set_value(0.2);
+            command_interfaces_[2].set_value(0.2);
         }
 
         return controller_interface::return_type::OK;

@@ -157,9 +157,9 @@ namespace riptide_controllers {
             // Rotation matrix desired to be applied on the Riptide
             Eigen::Vector3d w_ = SkewInv((R_.transpose() * Rw_).log());
 
-            w_(0) = params_.w[0];
-            w_(1) = params_.w[1];
-            w_(2) = params_.w[2];
+            // Patxi
+            w_(0) = - w_(0);
+            w_(1) = - w_(1);
 
             // Fin's angle computation
             double v_ = 1.0;

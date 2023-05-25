@@ -159,6 +159,10 @@ namespace riptide_controllers {
             q.y() = state_interfaces_[2].get_value();
             q.z() = state_interfaces_[3].get_value();
             q.w() = state_interfaces_[4].get_value();
+
+
+            RCLCPP_INFO(get_node()->get_logger(), "q: %f, %f, %f, %f", q.x(), q.y(), q.z(), q.w());
+
             R_ = q.normalized().toRotationMatrix();
 
             // Computing the desired rotation matrix Rw_

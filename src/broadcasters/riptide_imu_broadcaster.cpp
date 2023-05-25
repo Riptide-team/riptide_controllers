@@ -122,10 +122,10 @@ namespace riptide_broadcasters {
             realtime_imu_publisher_->msg_.angular_velocity.y = state_interfaces_[4].get_value();
             realtime_imu_publisher_->msg_.angular_velocity.z = state_interfaces_[5].get_value();
 
-            realtime_imu_publisher_->msg_.orientation.x = state_interfaces_[6].get_value();
-            realtime_imu_publisher_->msg_.orientation.y = state_interfaces_[7].get_value();
-            realtime_imu_publisher_->msg_.orientation.z = state_interfaces_[8].get_value();
-            realtime_imu_publisher_->msg_.orientation.w = state_interfaces_[9].get_value();
+            realtime_imu_publisher_->msg_.orientation.w = state_interfaces_[6].get_value();
+            realtime_imu_publisher_->msg_.orientation.x = state_interfaces_[7].get_value();
+            realtime_imu_publisher_->msg_.orientation.y = state_interfaces_[8].get_value();
+            realtime_imu_publisher_->msg_.orientation.z = state_interfaces_[9].get_value();
 
             realtime_imu_publisher_->unlockAndPublish();
         }

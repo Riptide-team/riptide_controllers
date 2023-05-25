@@ -161,10 +161,6 @@ namespace riptide_controllers {
             q.w() = state_interfaces_[4].get_value();
             R_ = q.normalized().toRotationMatrix();
 
-            double yaw, pitch, roll;
-            quaternion2euler(q.w(), q.x(), q.y(), q.z(), &roll, &pitch, &yaw);
-            RCLCPP_INFO(get_node()->get_logger(), "Yaw, Pitch Roll centrale: %f, %f, %f", yaw, pitch, roll);
-
             // Computing the desired rotation matrix Rw_
             double pitch_w =  K_inf_ * std::atan((requested_depth_ - current_depth_) / r_) * 2. / M_PI;
 
@@ -179,17 +175,17 @@ namespace riptide_controllers {
             Eigen::Quaternion<double> qr = rollAngle * pitchAngle * yawAngle;
             qr.normalize();
 
-            quaternion2euler(qr.w(), qr.x(), qr.y(), qr.z(), &roll, &pitch, &yaw);
-            RCLCPP_INFO(get_node()->get_logger(), "Yaw, Pitch Roll tranform Fabrice: %f, %f, %f", yaw, pitch, roll);
 
             Rw_ = qr.toRotationMatrix(); // .normalized()
 
             // Rotation matrix desired to be applied on the Riptide
             Eigen::Vector3d w_ = SkewInv((R_.transpose() * Rw_).log());
 
-            w_(0) = params_.w[0];
-            w_(1) = params_.w[1];
-            w_(2) = params_.w[2];
+            RCLCPP_INFO(get_node()->get_logger(), "w: %f, %f, %f", w_(0), w_(1), w_(2));
+
+            // w_(0) = params_.w[0];
+            // w_(1) = params_.w[1];
+            // w_(2) = params_.w[2];
 
             // Patxi
             w_(0) = - w_(0);

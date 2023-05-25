@@ -75,6 +75,7 @@ namespace riptide_controllers {
        Rw_ = Eigen::Matrix3d::Identity();
 
         RCLCPP_INFO(get_node()->get_logger(), "Parameters: %f, %f, %f %f", params_.thruster_velocity, K_inf_, K_fin_, r_);
+        RCLCPP_INFO(get_node()->get_logger(), "Wanted w: %f, %f, %f", params_.w[0], params_.w[1], params_.w[2]);
 
         RCLCPP_DEBUG(get_node()->get_logger(), "configure successful");
         return CallbackReturn::SUCCESS;

@@ -58,8 +58,8 @@ namespace riptide_controllers {
             // Helper to construct B
             Eigen::Matrix3d make_inv_B() {
                 return (Eigen::Matrix3d() << 5, -5, -5,
-                                0, -10*std::sin(2*M_PI/3), 10*std::sin(2*M_PI/3),
-                                -10, 10*std::cos(2*M_PI/3), 10*std::cos(2*M_PI/3)
+                                0, -10*std::sin(2*M_PI/3), 10*std::sin(4*M_PI/3),
+                                -10, 10*std::cos(2*M_PI/3), 10*std::cos(4*M_PI/3)
                         ).finished().inverse() ;
             };
 

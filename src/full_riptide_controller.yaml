@@ -59,3 +59,9 @@ full_riptide_controller:
     description: "Specifies the fin regulation corridor",
     read_only: true
   }
+  w: {
+    type: double_array,
+    default_value: [1., 0, 0.],
+    description: "Specifies the fin regulation corridor",
+    read_only: true
+  }

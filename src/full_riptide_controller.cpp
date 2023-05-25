@@ -146,6 +146,9 @@ namespace riptide_controllers {
             // Computing the desired rotation matrix Rw_
             double pitch_w =  K_inf_ * std::atan((requested_depth_ - current_depth_) / r_) * 2. / M_PI;
 
+            pitch_w = params_.pitch;
+            RCLCPP_INFO(get_node()->get_logger(), "Pitch: %f", pitch_w);
+
             // Wanted rotation matrix computation
             Eigen::AngleAxisd rollAngle(requested_roll_, Eigen::Vector3d::UnitX());
             Eigen::AngleAxisd pitchAngle(pitch_w, Eigen::Vector3d::UnitY());

@@ -65,3 +65,9 @@ full_riptide_controller:
     description: "Specifies the fin regulation corridor",
     read_only: true
   }
+  pitch: {
+    type: double,
+    default_value: 1.,
+    description: "Specifies the fin regulation corridor",
+    read_only: true
+  }

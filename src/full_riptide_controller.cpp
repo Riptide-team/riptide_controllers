@@ -162,10 +162,10 @@ namespace riptide_controllers {
 
             R_ = q.normalized().toRotationMatrix();
 
-            // Eigen::Matrix3d RrRrT = R_ * R_.transpose();
+            Eigen::Matrix3d RrRrT = R_ * R_.transpose();
 
-            // RCLCPP_INFO(get_node()->get_logger(), "Rr: %f, %f, %f | %f, %f, %f | %f, %f %f", R_(0,0), R_(0,1), R_(0,2), R_(1,0), R_(1,1), R_(1,2), R_(2,0), R_(2,1), R_(2,2));
-            // RCLCPP_INFO(get_node()->get_logger(), "RrRrT: %f, %f, %f | %f, %f, %f | %f, %f %f", RrRrT(0,0), RrRrT(0,1), RrRrT(0,2), RrRrT(1,0), RrRrT(1,1), RrRrT(1,2), RrRrT(2,0), RrRrT(2,1), RrRrT(2,2));
+            RCLCPP_INFO(get_node()->get_logger(), "Rr: %f, %f, %f | %f, %f, %f | %f, %f %f", R_(0,0), R_(0,1), R_(0,2), R_(1,0), R_(1,1), R_(1,2), R_(2,0), R_(2,1), R_(2,2));
+            RCLCPP_INFO(get_node()->get_logger(), "RrRrT: %f, %f, %f | %f, %f, %f | %f, %f %f", RrRrT(0,0), RrRrT(0,1), RrRrT(0,2), RrRrT(1,0), RrRrT(1,1), RrRrT(1,2), RrRrT(2,0), RrRrT(2,1), RrRrT(2,2));
 
 
             // Computing the desired rotation matrix Rw_

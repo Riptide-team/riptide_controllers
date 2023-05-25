@@ -80,14 +80,18 @@ namespace riptide_broadcasters {
         controller_interface::InterfaceConfiguration state_interfaces_config;
         state_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
         std::string prefix = std::string(get_node()->get_namespace()).substr(1);
-        std::vector<std::string> iface = {"linear_acceleration", "angular_velocity", "orientation"};
+        std::vector<std::string> iface = {"linear_acceleration", "angular_velocity"};
         std::vector<std::string> coords = {"x", "y", "z"};
         for (const auto &i: iface) {
             for (const auto &c: coords) {
                 state_interfaces_config.names.push_back(prefix + "_" + params_.sensor_name + "/" + i + "." + c);
             }
         }
+
         state_interfaces_config.names.push_back(prefix + "_" + params_.sensor_name + "/orientation.w");
+        state_interfaces_config.names.push_back(prefix + "_" + params_.sensor_name + "/orientation.x");
+        state_interfaces_config.names.push_back(prefix + "_" + params_.sensor_name + "/orientation.y");
+        state_interfaces_config.names.push_back(prefix + "_" + params_.sensor_name + "/orientation.z");
 
         // Adding magnetic field
         for (const auto &c: coords) {

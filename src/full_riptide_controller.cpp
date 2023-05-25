@@ -155,10 +155,10 @@ namespace riptide_controllers {
 
             // Rotation matrix storage
             Eigen::Quaterniond q;
-            q.x() = state_interfaces_[1].get_value();
-            q.y() = state_interfaces_[2].get_value();
-            q.z() = state_interfaces_[3].get_value();
-            q.w() = state_interfaces_[4].get_value();
+            q.w() = state_interfaces_[1].get_value();
+            q.x() = state_interfaces_[2].get_value();
+            q.y() = state_interfaces_[3].get_value();
+            q.z() = state_interfaces_[4].get_value();
 
             R_ = q.normalized().toRotationMatrix();
 

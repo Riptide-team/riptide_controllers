@@ -182,7 +182,8 @@ namespace riptide_controllers {
             Eigen::Matrix3d R = R_.transpose() * Rw_;
             RCLCPP_INFO(get_node()->get_logger(), "R: %f, %f, %f | %f, %f, %f | %f, %f %f", R(0,0), R(0,1), R(0,2), R(1,0), R(1,1), R(1,2), R(2,0), R(2,1), R(2,2));
 
-            Eigen::Vector3d w_ = SkewInv(R.log());
+            Eigen::Matrix3d R2 = R.log();
+            Eigen::Vector3d w_ = SkewInv(R2);
 
             RCLCPP_INFO(get_node()->get_logger(), "w: %f, %f, %f", w_(0), w_(1), w_(2));
 

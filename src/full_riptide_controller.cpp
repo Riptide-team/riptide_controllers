@@ -20,6 +20,24 @@
 
 namespace riptide_controllers {
 
+    inline double sqr(double x)
+    {
+        return x*x;
+    }
+
+    #ifndef constrain
+    #define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
+    #endif // !constrain
+
+    inline void quaternion2euler(double qw, double qx, double qy, double qz, double* pRoll, double* pPitch, double* pYaw)
+    {
+        *pRoll = atan2(2*qy*qz+2*qw*qx, 2*sqr(qw)+2*sqr(qz)-1);
+        *pPitch = -asin(constrain(2*qx*qz-2*qw*qy, -1, 1)); // Attempt to avoid potential NAN...
+        *pYaw = atan2(2*qx*qy+2*qw*qz, 2*sqr(qw)+2*sqr(qx)-1);
+    }
+
+
+
     controller_interface::CallbackReturn FullDepthController::on_init() {
         try {
             param_listener_ = std::make_shared<full_riptide_controller::ParamListener>(get_node());
@@ -143,11 +161,15 @@ namespace riptide_controllers {
             q.w() = state_interfaces_[4].get_value();
             R_ = q.normalized().toRotationMatrix();
 
+            double yaw, pitch, roll;
+            quaternion2euler(q.w(), q.x(), q.y(), q.z(), &roll, &pitch, &yaw);
+            RCLCPP_INFO(get_node()->get_logger(), "Yaw, Pitch Roll centrale: %f, %f, %f", yaw, pitch, roll);
+
             // Computing the desired rotation matrix Rw_
             double pitch_w =  K_inf_ * std::atan((requested_depth_ - current_depth_) / r_) * 2. / M_PI;
 
             pitch_w = params_.pitch;
-            RCLCPP_INFO(get_node()->get_logger(), "Pitch: %f, %f, %f", requested_yaw_, pitch_w, requested_roll_);
+            RCLCPP_INFO(get_node()->get_logger(), "Yaw Pitch Roll Requested: %f, %f, %f", requested_yaw_, pitch_w, requested_roll_);
 
             // Wanted rotation matrix computation
             Eigen::AngleAxisd rollAngle(requested_roll_, Eigen::Vector3d::UnitX());
@@ -157,7 +179,9 @@ namespace riptide_controllers {
             Eigen::Quaternion<double> qr = rollAngle * pitchAngle * yawAngle;
             qr.normalize();
 
-            
+            quaternion2euler(qr.w(), qr.x(), qr.y(), qr.z(), &roll, &pitch, &yaw);
+            RCLCPP_INFO(get_node()->get_logger(), "Yaw, Pitch Roll tranform Fabrice: %f, %f, %f", yaw, pitch, roll);
+
             Rw_ = qr.toRotationMatrix();
 
             // Rotation matrix desired to be applied on the Riptide

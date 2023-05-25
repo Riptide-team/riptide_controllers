@@ -160,16 +160,19 @@ namespace riptide_controllers {
             q.z() = state_interfaces_[3].get_value();
             q.w() = state_interfaces_[4].get_value();
 
-
-            RCLCPP_INFO(get_node()->get_logger(), "q: %f, %f, %f, %f", q.x(), q.y(), q.z(), q.w());
-
             R_ = q.normalized().toRotationMatrix();
+
+            Eigen::Matrix3d RrRrT = R_ * R_.transpose();
+
+            RCLCPP_INFO(get_node()->get_logger(), "Rr: %f, %f, %f | %f, %f, %f | %f, %f %f", R_(0,0), R_(0,1), R_(0,2), R_(1,0), R_(1,1), R_(1,2), R_(2,0), R_(2,1), R_(2,2));
+            RCLCPP_INFO(get_node()->get_logger(), "RrRrT: %f, %f, %f | %f, %f, %f | %f, %f %f", RrRrT(0,0), RrRrT(0,1), RrRrT(0,2), RrRrT(1,0), RrRrT(1,1), RrRrT(1,2), RrRrT(2,0), RrRrT(2,1), RrRrT(2,2));
+
 
             // Computing the desired rotation matrix Rw_
             double pitch_w =  K_inf_ * std::atan((requested_depth_ - current_depth_) / r_) * 2. / M_PI;
 
             pitch_w = params_.pitch;
-            RCLCPP_INFO(get_node()->get_logger(), "Yaw Pitch Roll Requested: %f, %f, %f", requested_yaw_, pitch_w, requested_roll_);
+            // RCLCPP_INFO(get_node()->get_logger(), "Yaw Pitch Roll Requested: %f, %f, %f", requested_yaw_, pitch_w, requested_roll_);
 
             // Wanted rotation matrix computation
             Eigen::AngleAxisd rollAngle(requested_roll_, Eigen::Vector3d::UnitX());
@@ -185,6 +188,7 @@ namespace riptide_controllers {
             // Rotation matrix desired to be applied on the Riptide
             Eigen::Matrix3d R = R_.transpose() * Rw_;
             RCLCPP_INFO(get_node()->get_logger(), "R: %f, %f, %f | %f, %f, %f | %f, %f %f", R(0,0), R(0,1), R(0,2), R(1,0), R(1,1), R(1,2), R(2,0), R(2,1), R(2,2));
+            RCLCPP_INFO(get_node()->get_logger(), "R.RT: %f, %f, %f | %f, %f, %f | %f, %f %f", R(0,0), R(0,1), R(0,2), R(1,0), R(1,1), R(1,2), R(2,0), R(2,1), R(2,2));
             RCLCPP_INFO(get_node()->get_logger(), "Rw: %f, %f, %f | %f, %f, %f | %f, %f %f", Rw_(0,0), Rw_(0,1), Rw_(0,2), Rw_(1,0), Rw_(1,1), Rw_(1,2), Rw_(2,0), Rw_(2,1), Rw_(2,2));
 
             Eigen::Matrix3d R2 = R.log();

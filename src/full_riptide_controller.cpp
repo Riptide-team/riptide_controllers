@@ -162,7 +162,9 @@ namespace riptide_controllers {
 
             RCLCPP_INFO(get_node()->get_logger(), "q_robot: %f, %f, %f, %f", q.w(), q.x(), q.y(), q.z());
 
-            R_ = q.normalized().toRotationMatrix();
+            q.normalize();
+
+            R_ = q.toRotationMatrix();
 
             Eigen::Matrix3d RrRrT = R_ * R_.transpose();
 

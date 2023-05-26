@@ -196,11 +196,18 @@ namespace riptide_controllers {
             // RCLCPP_INFO(get_node()->get_logger(), "Yaw Pitch Roll Requested: %f, %f, %f", requested_yaw_, pitch_w, requested_roll_);
 
             // Wanted rotation matrix computation
-            Eigen::AngleAxisd rollAngle(requested_roll_, Eigen::Vector3d::UnitX());
-            Eigen::AngleAxisd pitchAngle(pitch_w, Eigen::Vector3d::UnitY());
-            Eigen::AngleAxisd yawAngle(requested_yaw_, Eigen::Vector3d::UnitZ());
+            // Eigen::AngleAxisd rollAngle(requested_roll_, Eigen::Vector3d::UnitX());
+            // Eigen::AngleAxisd pitchAngle(pitch_w, Eigen::Vector3d::UnitY());
+            // Eigen::AngleAxisd yawAngle(requested_yaw_, Eigen::Vector3d::UnitZ());
+            // Rw_ = rollAngle.toRotationMatrix() * pitchAngle.toRotationMatrix() * yawAngle.toRotationMatrix();
 
-            Rw_ = rollAngle.toRotationMatrix() * pitchAngle.toRotationMatrix() * yawAngle.toRotationMatrix();
+            cphi   = cos(requested_roll_);        sphi   = sin(requested_roll_);
+            ctheta = cos(pitch_w);      stheta = sin(pitch_w);
+            cpsi   = cos(requested_yaw_);        spsi   = sin(requested_yaw_);
+            Rw_(0, 0) = ctheta*cpsi; Rw_(0,1) = -cphi*spsi+stheta*cpsi*sphi ; Rw_(0,0) = spsi*sphi+stheta*cpsi*cphi;
+            Rw_(1,0) = ctheta*spsi;  Rw_(1,1) = cpsi*cphi+stheta*spsi*sphi ;  Rw_(1,0) = -cpsi*sphi+stheta*cphi*spsi;
+            Rw_(2,0) = -stheta;      Rw_(2,1) = ctheta*sphi ;                 Rw_(2,0) = ctheta*cphi;
+
 
             // double yaw, pitch, roll;
             // quaternion2euler(qr.w(), qr.x(), qr.y(), qr.z(), &roll, &pitch, &yaw);

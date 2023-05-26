@@ -179,9 +179,9 @@ namespace riptide_controllers {
             cpsi   = cos(yaw);        spsi   = sin(yaw);
             R_(0, 0) = ctheta*cpsi; R_(0,1) = -cphi*spsi+stheta*cpsi*sphi ; R_(0,0) = spsi*sphi+stheta*cpsi*cphi;
             R_(1,0) = ctheta*spsi;  R_(1,1) = cpsi*cphi+stheta*spsi*sphi ;  R_(1,0) = -cpsi*sphi+stheta*cphi*spsi;
-            R_(2,0) = -stheta;      R_(2,1) = ctheta*sphi ;            R_(2,0) = ctheta*cphi;
+            R_(2,0) = -stheta;      R_(2,1) = ctheta*sphi ;                 R_(2,0) = ctheta*cphi;
 
-            R_ = q.toRotationMatrix();
+            // R_ = q.toRotationMatrix();
 
             Eigen::Matrix3d RrRrT = R_ * R_.transpose();
 

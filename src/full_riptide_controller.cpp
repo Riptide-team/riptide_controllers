@@ -177,9 +177,9 @@ namespace riptide_controllers {
             cphi   = cos(roll);        sphi   = sin(roll);
             ctheta = cos(pitch);      stheta = sin(pitch);
             cpsi   = cos(yaw);        spsi   = sin(yaw);
-            R_(0, 0) = ctheta*cpsi; R_(0,1) = -cphi*spsi+stheta*cpsi*sphi ; R_(0,0) = spsi*sphi+stheta*cpsi*cphi;
-            R_(1,0) = ctheta*spsi;  R_(1,1) = cpsi*cphi+stheta*spsi*sphi ;  R_(1,0) = -cpsi*sphi+stheta*cphi*spsi;
-            R_(2,0) = -stheta;      R_(2,1) = ctheta*sphi ;                 R_(2,0) = ctheta*cphi;
+            R_(0, 0) = ctheta*cpsi; R_(0,1) = -cphi*spsi+stheta*cpsi*sphi ; R_(0,2) = spsi*sphi+stheta*cpsi*cphi;
+            R_(1,0) = ctheta*spsi;  R_(1,1) = cpsi*cphi+stheta*spsi*sphi ;  R_(1,2) = -cpsi*sphi+stheta*cphi*spsi;
+            R_(2,0) = -stheta;      R_(2,1) = ctheta*sphi ;                 R_(2,2) = ctheta*cphi;
 
             // R_ = q.toRotationMatrix();
 
@@ -204,9 +204,9 @@ namespace riptide_controllers {
             cphi   = cos(requested_roll_);        sphi   = sin(requested_roll_);
             ctheta = cos(pitch_w);      stheta = sin(pitch_w);
             cpsi   = cos(requested_yaw_);        spsi   = sin(requested_yaw_);
-            Rw_(0, 0) = ctheta*cpsi; Rw_(0,1) = -cphi*spsi+stheta*cpsi*sphi ; Rw_(0,0) = spsi*sphi+stheta*cpsi*cphi;
-            Rw_(1,0) = ctheta*spsi;  Rw_(1,1) = cpsi*cphi+stheta*spsi*sphi ;  Rw_(1,0) = -cpsi*sphi+stheta*cphi*spsi;
-            Rw_(2,0) = -stheta;      Rw_(2,1) = ctheta*sphi ;                 Rw_(2,0) = ctheta*cphi;
+            Rw_(0, 0) = ctheta*cpsi; Rw_(0,1) = -cphi*spsi+stheta*cpsi*sphi ; Rw_(0,2) = spsi*sphi+stheta*cpsi*cphi;
+            Rw_(1,0) = ctheta*spsi;  Rw_(1,1) = cpsi*cphi+stheta*spsi*sphi ;  Rw_(1,2) = -cpsi*sphi+stheta*cphi*spsi;
+            Rw_(2,0) = -stheta;      Rw_(2,1) = ctheta*sphi ;                 Rw_(2,2) = ctheta*cphi;
 
 
             // double yaw, pitch, roll;

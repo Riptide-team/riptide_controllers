@@ -164,6 +164,14 @@ namespace riptide_controllers {
 
             q.normalize();
 
+            double yaw, pitch, roll;
+            quaternion2euler(q.w(), q.x(), q.y(), q.z(), &roll, &pitch, &yaw);
+
+            std::cout << "yaw: \t"  << yaw * 180. / M_PI << std::endl;
+            std::cout << "pitch: \t" << pitch * 180. / M_PI <<  std::endl;
+            std::cout << "roll: \t"  << roll * 180. / M_PI <<  std::endl;
+            std::cout << std::endl;
+
             R_ = q.toRotationMatrix();
 
             Eigen::Matrix3d RrRrT = R_ * R_.transpose();

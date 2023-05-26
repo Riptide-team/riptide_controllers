@@ -183,19 +183,18 @@ namespace riptide_controllers {
             Eigen::AngleAxisd pitchAngle(pitch_w, Eigen::Vector3d::UnitY());
             Eigen::AngleAxisd yawAngle(requested_yaw_, Eigen::Vector3d::UnitZ());
 
-            Eigen::Quaternion<double> qr = rollAngle * pitchAngle * yawAngle;
-            qr.normalize();
+            Rw_ = rollAngle.toRotationMatrix() * pitchAngle.toRotationMatrix() * yawAngle.toRotationMatrix();
 
-            double yaw, pitch, roll;
-            quaternion2euler(qr.w(), qr.x(), qr.y(), qr.z(), &roll, &pitch, &yaw);
+            // double yaw, pitch, roll;
+            // quaternion2euler(qr.w(), qr.x(), qr.y(), qr.z(), &roll, &pitch, &yaw);
 
-            std::cout << "yaw: \t"  << yaw * 180. / M_PI << std::endl;
-            std::cout << "pitch: \t" << pitch * 180. / M_PI <<  std::endl;
-            std::cout << "roll: \t"  << roll * 180. / M_PI <<  std::endl;
-            std::cout << std::endl;
+            // std::cout << "yaw: \t"  << yaw * 180. / M_PI << std::endl;
+            // std::cout << "pitch: \t" << pitch * 180. / M_PI <<  std::endl;
+            // std::cout << "roll: \t"  << roll * 180. / M_PI <<  std::endl;
+            // std::cout << std::endl;
 
 
-            Rw_ = qr.toRotationMatrix(); // .normalized()
+            // Rw_ = qr.toRotationMatrix(); // .normalized()
 
             // Rotation matrix desired to be applied on the Riptide
             Eigen::Matrix3d R = R_.transpose() * Rw_;

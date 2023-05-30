@@ -72,7 +72,7 @@ namespace riptide_controllers {
     controller_interface::InterfaceConfiguration RiptideController::command_interface_configuration() const {
         controller_interface::InterfaceConfiguration command_interfaces_config;
         command_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
-        command_interfaces_config.names.push_back(params_.thruster_joint + "/position");
+        command_interfaces_config.names.push_back(params_.thruster_joint + "/velocity");
         command_interfaces_config.names.push_back(params_.d_joint + "/position");
         command_interfaces_config.names.push_back(params_.p_joint + "/position");
         command_interfaces_config.names.push_back(params_.s_joint + "/position");

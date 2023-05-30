@@ -118,7 +118,7 @@ namespace riptide_broadcasters {
         }
 
         // Multiplexer interfaces
-        state_interfaces_config.names.push_back(prefix + "_" + params_.multiplexer_name + "/control");
+        state_interfaces_config.names.push_back(prefix + "_" + params_.multiplexer_name + "/automatic");
         state_interfaces_config.names.push_back(prefix + "_" + params_.multiplexer_name + "/remaining_time");
 
         return state_interfaces_config;

@@ -83,7 +83,7 @@ namespace riptide_controllers {
         controller_interface::InterfaceConfiguration state_interfaces_config;
         state_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
         std::vector<std::string> coords = {"x", "y", "z"};
-        
+
         for (const auto &c: coords) {
             state_interfaces_config.names.push_back(params_.imu_name + "/angular_velocity." + c);
         }
@@ -126,11 +126,12 @@ namespace riptide_controllers {
         w_(2) = (*twist_command)->angular.z;
 
         // Generating command
-        double v = (*twist_feedback)->twist.linear.x;
+        double v = 1.;
         u_ = 1. / v * inv_B * w_;
 
         double Kp = 1.;
         double u0 = 120. * M_PI * Kp * ((*twist_command)->linear.x - v);
+        double u0 = (*twist_feedback)->twist.linear.x;
         command_interfaces_[0].set_value(u0);
         command_interfaces_[1].set_value(u_(0));
         command_interfaces_[2].set_value(u_(1));

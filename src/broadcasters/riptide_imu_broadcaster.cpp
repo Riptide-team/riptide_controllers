@@ -112,6 +112,7 @@ namespace riptide_broadcasters {
         if (realtime_imu_publisher_ && realtime_imu_publisher_->trylock()) {
             // Header
             realtime_imu_publisher_->msg_.header.stamp = get_node()->now();
+            realtime_imu_publisher_->msg_.header.frame_id = std::string(get_node()->get_namespace()).substr(1);
 
             // Data
             realtime_imu_publisher_->msg_.linear_acceleration.x = state_interfaces_[0].get_value();

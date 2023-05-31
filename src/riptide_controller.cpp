@@ -83,6 +83,7 @@ namespace riptide_controllers {
         controller_interface::InterfaceConfiguration state_interfaces_config;
         state_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
         std::vector<std::string> coords = {"x", "y", "z"};
+        
         for (const auto &c: coords) {
             state_interfaces_config.names.push_back(params_.imu_name + "/angular_velocity." + c);
         }

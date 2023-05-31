@@ -122,9 +122,9 @@ namespace riptide_controllers {
         auto twist_feedback = rt_feedback_ptr_.readFromRT();
 
         // no command received yet
-        if (!twist_feedback || !(*twist_feedback)) {
-            return controller_interface::return_type::OK;
-        }
+        // if (!twist_feedback || !(*twist_feedback)) {
+        //     return controller_interface::return_type::OK;
+        // }
 
         w_(0) = (*twist_command)->angular.x;
         w_(1) = (*twist_command)->angular.y;

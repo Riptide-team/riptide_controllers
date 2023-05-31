@@ -125,6 +125,8 @@ namespace riptide_controllers {
         w_(1) = (*twist_command)->angular.y;
         w_(2) = (*twist_command)->angular.z;
 
+        RCLCPP_INFO(get_node()->get_logger(), "Rceived %f / %f %f %f", (*twist_command)->linear.x, (*twist_command)->angular.x, (*twist_command)->angular.y, (*twist_command)->angular.z);
+
         // Generating command
         double v = 1.;
         u_ = 1. / v * inv_B * w_;
@@ -136,6 +138,8 @@ namespace riptide_controllers {
         command_interfaces_[1].set_value(u_(0));
         command_interfaces_[2].set_value(u_(1));
         command_interfaces_[3].set_value(u_(2));
+
+        RCLCPP_INFO(get_node()->get_logger(), "Publishing %f %f %f %f", u0, u_(0), u_(1), u_(2));
         
         return controller_interface::return_type::OK;
     }

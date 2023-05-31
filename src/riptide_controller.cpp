@@ -119,7 +119,7 @@ namespace riptide_controllers {
         }
 
         // Getting the twist feedback
-        auto twist_feedback = rt_feedback_ptr_.readFromRT();
+        // auto twist_feedback = rt_feedback_ptr_.readFromRT();
 
         // no command received yet
         // if (!twist_feedback || !(*twist_feedback)) {
@@ -138,7 +138,7 @@ namespace riptide_controllers {
 
         // double Kp = 1.;
         // double u0 = 120. * M_PI * Kp * ((*twist_command)->linear.x - v);
-        double u0 = (*twist_feedback)->twist.linear.x;
+        double u0 = (*twist_command)->twist.linear.x;
         command_interfaces_[0].set_value(u0);
         command_interfaces_[1].set_value(u_(0));
         command_interfaces_[2].set_value(u_(1));

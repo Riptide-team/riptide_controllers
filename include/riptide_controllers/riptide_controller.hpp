@@ -38,6 +38,9 @@ namespace riptide_controllers {
             riptide_controller::Params params_;
 
             // Wanted rotation velocity
+            Eigen::Vector3d wc_;
+
+            // Previous wanted velocity
             Eigen::Vector3d w_;
 
             // Wanted control vector

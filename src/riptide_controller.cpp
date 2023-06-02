@@ -60,11 +60,6 @@ namespace riptide_controllers {
             [this](const CmdType::SharedPtr msg) { rt_command_ptr_.writeFromNonRT(msg); }
         );
 
-        twist_feedback_subscriber_ = get_node()->create_subscription<FeedbackType>(
-            std::string(get_node()->get_namespace()) + "/state_estimator/twist", rclcpp::SystemDefaultsQoS(),
-            [this](const FeedbackType::SharedPtr msg) { rt_feedback_ptr_.writeFromNonRT(msg); }
-        );
-
         RCLCPP_DEBUG(get_node()->get_logger(), "configure successful");
         return CallbackReturn::SUCCESS;
     }
@@ -109,7 +104,7 @@ namespace riptide_controllers {
         return CallbackReturn::SUCCESS;
     }
 
-    controller_interface::return_type RiptideController::update(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) {
+    controller_interface::return_type RiptideController::update(const rclcpp::Time & /*time*/, const rclcpp::Duration & period) {
         // Getting the twist command
         auto twist_command = rt_command_ptr_.readFromRT();
 
@@ -118,33 +113,36 @@ namespace riptide_controllers {
             return controller_interface::return_type::OK;
         }
 
-        // Getting the twist feedback
-        // auto twist_feedback = rt_feedback_ptr_.readFromRT();
+        // Getting the twist command
+        wc_(0) = (*twist_command)->angular.x;
+        wc_(1) = (*twist_command)->angular.y;
+        wc_(2) = (*twist_command)->angular.z;
 
-        // no command received yet
-        // if (!twist_feedback || !(*twist_feedback)) {
-        //     return controller_interface::return_type::OK;
-        // }
+        // Getting actual twist
+        Eigen::Vector3d wm_;
+        wm_(0) = state_interfaces_[0].get_value();
+        wm_(1) = state_interfaces_[1].get_value();
+        wm_(2) = state_interfaces_[2].get_value();
 
-        w_(0) = (*twist_command)->angular.x;
-        w_(1) = (*twist_command)->angular.y;
-        w_(2) = (*twist_command)->angular.z;
+        // TODO publish error on a topic ~/error of type float32
+        // Computing angular velocity error
+        double K = 0.5;
+        w_ = w_ - K * period.seconds() * (wc_ - wm_);
 
-        RCLCPP_INFO(get_node()->get_logger(), "Rceived %f / %f %f %f", (*twist_command)->linear.x, (*twist_command)->angular.x, (*twist_command)->angular.y, (*twist_command)->angular.z);
+        RCLCPP_DEBUG(get_node()->get_logger(), "Rceived %f / %f %f %f", (*twist_command)->linear.x, (*twist_command)->angular.x, (*twist_command)->angular.y, (*twist_command)->angular.z);
 
         // Generating command
         double v = 1.;
         u_ = 1. / v * inv_B * w_;
 
-        // double Kp = 1.;
-        // double u0 = 120. * M_PI * Kp * ((*twist_command)->linear.x - v);
+        // Generating the command
         double u0 = (*twist_command)->linear.x;
         command_interfaces_[0].set_value(u0);
         command_interfaces_[1].set_value(u_(0));
         command_interfaces_[2].set_value(u_(1));
         command_interfaces_[3].set_value(u_(2));
 
-        RCLCPP_INFO(get_node()->get_logger(), "Publishing %f %f %f %f", u0, u_(0), u_(1), u_(2));
+        RCLCPP_DEBUG(get_node()->get_logger(), "Publishing %f %f %f %f", u0, u_(0), u_(1), u_(2));
         
         return controller_interface::return_type::OK;
     }

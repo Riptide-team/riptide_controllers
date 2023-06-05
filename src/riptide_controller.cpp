@@ -135,6 +135,10 @@ namespace riptide_controllers {
         double v = 1.;
         u_ = 1. / v * inv_B * w_;
 
+        for (double &u: u_) {
+            u = M_PI / 4 * 2. / M_PI * std::atan(u / M_PI/10);
+        }
+
         // Generating the command
         double u0 = (*twist_command)->linear.x;
         command_interfaces_[0].set_value(u0);

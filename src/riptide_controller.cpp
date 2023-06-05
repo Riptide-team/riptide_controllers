@@ -135,8 +135,8 @@ namespace riptide_controllers {
         double v = 1.;
         u_ = 1. / v * inv_B * w_;
 
-        double K_fin = M_PI / 4;
-        double r_fin = M_PI / 10;
+        double K_fin = M_PI / 4.;
+        double r_fin = M_PI / 10.;
         for (double &u: u_) {
             u = K_fin * 2. / M_PI * std::atan(u / r_fin);
         }

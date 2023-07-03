@@ -115,7 +115,7 @@ namespace riptide_controllers {
 
         // Getting the twist command
         wc_(0) = -(*twist_command)->angular.x;
-        wc_(1) = (*twist_command)->angular.y;
+        wc_(1) = -(*twist_command)->angular.y;
         wc_(2) = -(*twist_command)->angular.z;
 
         // Getting actual twist

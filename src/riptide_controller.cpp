@@ -126,8 +126,10 @@ namespace riptide_controllers {
 
         // TODO publish error on a topic ~/error of type float32
         // Computing angular velocity error
-        double K = 0.5;
-        w_ = w_ - K * period.seconds() * (wc_ - wm_);
+        // double K = 0.5;
+        // w_ = w_ - K * period.seconds() * (wc_ - wm_);
+
+        w_ = wc_;
 
         RCLCPP_DEBUG(get_node()->get_logger(), "Rceived %f / %f %f %f", (*twist_command)->linear.x, (*twist_command)->angular.x, (*twist_command)->angular.y, (*twist_command)->angular.z);
 

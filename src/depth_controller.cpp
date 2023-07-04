@@ -90,7 +90,7 @@ namespace riptide_controllers {
         controller_interface::InterfaceConfiguration command_interfaces_config;
         command_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
         std::string prefix = std::string(get_node()->get_namespace()).substr(1);
-        command_interfaces_config.names.push_back(prefix + "_" + params_.thruster_joint + "/position");
+        command_interfaces_config.names.push_back(prefix + "_" + params_.thruster_joint + "/velocity");
         command_interfaces_config.names.push_back(prefix + "_" + params_.p_joint + "/position");
         command_interfaces_config.names.push_back(prefix + "_" + params_.s_joint + "/position");
         return command_interfaces_config;
@@ -123,15 +123,16 @@ namespace riptide_controllers {
         std::lock_guard<std::mutex> lock_(depth_mutex_);
         current_depth_ = state_interfaces_[0].get_value();
 
-        pitch_ = - std::asin(state_interfaces_[1].get_value() / 9.8);
+        // TODO fix why in simu pitch_ = + std::asin(...) and on the real robot pitch_ = - std::asin(...)
+        pitch_ = std::asin(state_interfaces_[1].get_value() / 9.8);
 
         if (mode_ == "DEPTH") {
             command_interfaces_[0].set_value(params_.thruster_velocity);
-            command_interfaces_[1].set_value(alpha);
-            command_interfaces_[2].set_value(-alpha);
+            command_interfaces_[1].set_value(-alpha);
+            command_interfaces_[2].set_value(alpha);
         }
         else if (mode_ == "IMMERSE") {
-            command_interfaces_[0].set_value(requested_velocity_);
+            command_interfaces_[0].set_value(-params_.thruster_velocity);
             command_interfaces_[1].set_value(-alpha);
             command_interfaces_[2].set_value(alpha);
         }

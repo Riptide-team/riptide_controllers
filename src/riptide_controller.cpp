@@ -5,6 +5,7 @@
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include "rclcpp_lifecycle/state.hpp"
 #include "rclcpp/qos.hpp"
+#include "rclcpp/duration.hpp"
 
 #include "realtime_tools/realtime_buffer.h"
 
@@ -60,6 +61,8 @@ namespace riptide_controllers {
             [this](const CmdType::SharedPtr msg) { rt_command_ptr_.writeFromNonRT(msg); }
         );
 
+        last_received_command_time = get_node()->get_clock()->now();
+
         RCLCPP_DEBUG(get_node()->get_logger(), "configure successful");
         return CallbackReturn::SUCCESS;
     }
@@ -104,7 +107,19 @@ namespace riptide_controllers {
         return CallbackReturn::SUCCESS;
     }
 
-    controller_interface::return_type RiptideController::update(const rclcpp::Time & /*time*/, const rclcpp::Duration & period) {
+    controller_interface::return_type RiptideController::update(const rclcpp::Time & time, const rclcpp::Duration & /*period*/) {
+
+        if (time - last_received_command_time > rclcpp::Duration::from_seconds(params_.command_timeout)) {
+            command_interfaces_[0].set_value(0.);
+            command_interfaces_[1].set_value(0.);
+            command_interfaces_[2].set_value(0.);
+            command_interfaces_[3].set_value(0.);
+
+            RCLCPP_DEBUG_THROTTLE(get_node()->get_logger(), *(get_node()->get_clock()), 3000, "No Twist received, publishing null control!");
+            return controller_interface::return_type::OK;
+        }
+
+
         // Getting the twist command
         auto twist_command = rt_command_ptr_.readFromRT();
 
@@ -113,10 +128,13 @@ namespace riptide_controllers {
             return controller_interface::return_type::OK;
         }
 
+        // Getting the time of the received message
+        last_received_command_time = (*twist_command)->header.stamp;
+
         // Getting the twist command
-        wc_(0) = -(*twist_command)->angular.x;
-        wc_(1) = -(*twist_command)->angular.y;
-        wc_(2) = -(*twist_command)->angular.z;
+        wc_(0) = -(*twist_command)->twist.angular.x;
+        wc_(1) = -(*twist_command)->twist.angular.y;
+        wc_(2) = -(*twist_command)->twist.angular.z;
 
         // Getting actual twist
         Eigen::Vector3d wm_;
@@ -131,7 +149,7 @@ namespace riptide_controllers {
 
         w_ = wc_;
 
-        RCLCPP_DEBUG(get_node()->get_logger(), "Rceived %f / %f %f %f", (*twist_command)->linear.x, (*twist_command)->angular.x, (*twist_command)->angular.y, (*twist_command)->angular.z);
+        RCLCPP_DEBUG(get_node()->get_logger(), "Rceived %f / %f %f %f", (*twist_command)->twist.linear.x, (*twist_command)->twist.angular.x, (*twist_command)->twist.angular.y, (*twist_command)->twist.angular.z);
 
         // Generating command
         double v = 1.;
@@ -144,7 +162,7 @@ namespace riptide_controllers {
         }
 
         // Generating the command
-        double u0 = (*twist_command)->linear.x;
+        double u0 = (*twist_command)->twist.linear.x;
         command_interfaces_[0].set_value(u0);
         command_interfaces_[1].set_value(u_(0));
         command_interfaces_[2].set_value(u_(1));

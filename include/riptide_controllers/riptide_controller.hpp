@@ -5,7 +5,6 @@
 #include <string>
 
 #include "realtime_tools/realtime_buffer.h"
-#include "geometry_msgs/msg/twist.hpp"
 #include "geometry_msgs/msg/twist_stamped.hpp"
 
 #include <eigen3/Eigen/Dense>
@@ -14,7 +13,7 @@ namespace riptide_controllers {
 
     class RiptideController : public controller_interface::ControllerInterface {
         public:
-            using CmdType = geometry_msgs::msg::Twist;
+            using CmdType = geometry_msgs::msg::TwistStamped;
             using FeedbackType = geometry_msgs::msg::TwistStamped;
 
             RiptideController();
@@ -61,9 +60,7 @@ namespace riptide_controllers {
             realtime_tools::RealtimeBuffer<std::shared_ptr<CmdType>> rt_command_ptr_;
             rclcpp::Subscription<CmdType>::SharedPtr twist_command_subscriber_;
 
-            // feedback loop subscriber
-            realtime_tools::RealtimeBuffer<std::shared_ptr<FeedbackType>> rt_feedback_ptr_;
-            rclcpp::Subscription<FeedbackType>::SharedPtr twist_feedback_subscriber_;
+            rclcpp::Time last_received_command_time;
     };
 
 } // riptide_controllers

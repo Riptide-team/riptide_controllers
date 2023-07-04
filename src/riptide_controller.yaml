@@ -24,3 +24,9 @@ riptide_controller:
     description: "Specifies the imu name which will be claimed by the controller",
     read_only: true
   }
+  command_timeout: {
+    type: double,
+    default_value: 1.0,
+    description: "Specifies the timeout to shutdown commands when no messages are send",
+    read_only: true
+  }

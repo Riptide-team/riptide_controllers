@@ -120,7 +120,7 @@ namespace riptide_controllers {
                 command_interfaces_[2].set_value(0.);
                 command_interfaces_[3].set_value(0.);
 
-                RCLCPP_WARN_THROTTLE(get_node()->get_logger(), *(get_node()->get_clock()), 3000, "No Twist received, publishing null control!");
+                RCLCPP_WARN_THROTTLE(get_node()->get_logger(), *(get_node()->get_clock()), 5000, "No Twist received, publishing null control!");
             }
             return controller_interface::return_type::OK;
         }

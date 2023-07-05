@@ -108,7 +108,7 @@ namespace riptide_controllers {
     }
 
     controller_interface::return_type RiptideController::update(const rclcpp::Time & time, const rclcpp::Duration & /*period*/) {
-        
+
         RCLCPP_INFO(get_node()->get_logger(), "Time difference: %f", (time - last_received_command_time).nanoseconds() * 1e-9);
 
         // Getting the twist command
@@ -116,20 +116,21 @@ namespace riptide_controllers {
 
         // no command received yet
         if (!twist_command || !(*twist_command)) {
-            if (time - last_received_command_time > rclcpp::Duration::from_seconds(params_.command_timeout)) {
-                command_interfaces_[0].set_value(0.);
-                command_interfaces_[1].set_value(0.);
-                command_interfaces_[2].set_value(0.);
-                command_interfaces_[3].set_value(0.);
-
-
-                RCLCPP_WARN_THROTTLE(get_node()->get_logger(), *(get_node()->get_clock()), 5000, "No Twist received, publishing null control!");
-            }
             return controller_interface::return_type::OK;
         }
 
         // Store time of the received message
         last_received_command_time = rclcpp::Time((*twist_command)->header.stamp);
+
+        if ((time - last_received_command_time).nanoseconds() * 1e-9 > params_.command_timeout) {
+            command_interfaces_[0].set_value(0.);
+            command_interfaces_[1].set_value(0.);
+            command_interfaces_[2].set_value(0.);
+            command_interfaces_[3].set_value(0.);
+
+            RCLCPP_WARN_THROTTLE(get_node()->get_logger(), *(get_node()->get_clock()), 5000, "No Twist received, publishing null control!");
+            return controller_interface::return_type::OK;
+        }
 
         // Getting the twist command
         wc_(0) = -(*twist_command)->twist.angular.x;

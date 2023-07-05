@@ -128,7 +128,7 @@ namespace riptide_controllers {
         }
 
         // Store time of the received message
-        last_received_command_time = rclcpp::Time::from_msg((*twist_command)->header.stamp);
+        last_received_command_time = rclcpp::Time((*twist_command)->header.stamp);
 
         // Getting the twist command
         wc_(0) = -(*twist_command)->twist.angular.x;

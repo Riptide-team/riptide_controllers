@@ -109,7 +109,7 @@ namespace riptide_controllers {
 
     controller_interface::return_type RiptideController::update(const rclcpp::Time & time, const rclcpp::Duration & /*period*/) {
 
-        RCLCPP_INFO(get_node()->get_logger(), "Time difference: %f", (time - last_received_command_time).nanoseconds() * 1e-9);
+        RCLCPP_DEBUG(get_node()->get_logger(), "Time difference: %f", (time - last_received_command_time).nanoseconds() * 1e-9);
 
         // Getting the twist command
         auto twist_command = rt_command_ptr_.readFromRT();

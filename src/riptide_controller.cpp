@@ -120,15 +120,15 @@ namespace riptide_controllers {
                 command_interfaces_[2].set_value(0.);
                 command_interfaces_[3].set_value(0.);
 
-                RCLCPP_INFO(get_node()->get_logger(), "Time difference: %f", (time - last_received_command_time).nanoseconds() / 1e-9);
+                RCLCPP_INFO(get_node()->get_logger(), "Time difference: %f", (time - last_received_command_time).nanoseconds() * 1e-9);
 
                 RCLCPP_WARN_THROTTLE(get_node()->get_logger(), *(get_node()->get_clock()), 5000, "No Twist received, publishing null control!");
             }
             return controller_interface::return_type::OK;
         }
 
-        // Getting the time of the received message
-        last_received_command_time = (*twist_command)->header.stamp;
+        // Store time of the received message
+        last_received_command_time = time;
 
         // Getting the twist command
         wc_(0) = -(*twist_command)->twist.angular.x;

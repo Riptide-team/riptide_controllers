@@ -152,10 +152,8 @@ namespace riptide_controllers {
         double v = 1.;
         u_ = 1. / v * inv_B * w_;
 
-        double K_fin = 1.;
-        double r_fin = .05;
         for (double &u: u_) {
-            u = K_fin * std::atan(u / r_fin);
+            u = params_.K_fin * std::atan(u / params_.r_fin);
         }
 
         // Generating the command

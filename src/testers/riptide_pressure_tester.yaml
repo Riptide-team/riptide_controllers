@@ -1,6 +1,0 @@
-riptide_pressure_tester:
-  sensor_name: {
-    type: string,
-    description: "Specifies the sensor name used in URDF's HardwareInterface (e.g `battery_card`).",
-    read_only: true
-  }

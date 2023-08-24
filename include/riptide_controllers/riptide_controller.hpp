@@ -1,6 +1,6 @@
 #pragma once
 
-#include "controller_interface/controller_interface.hpp"
+#include "controller_interface/chainable_controller_interface.hpp"
 #include "riptide_controller_parameters.hpp"
 #include <string>
 
@@ -11,7 +11,7 @@
 
 namespace riptide_controllers {
 
-    class RiptideController : public controller_interface::ControllerInterface {
+    class RiptideController : public controller_interface::ChainableControllerInterface {
         public:
             using CmdType = geometry_msgs::msg::TwistStamped;
             using FeedbackType = geometry_msgs::msg::TwistStamped;
@@ -30,7 +30,14 @@ namespace riptide_controllers {
 
             controller_interface::CallbackReturn on_deactivate(const rclcpp_lifecycle::State & previous_state) override;
 
-            controller_interface::return_type update(const rclcpp::Time & time, const rclcpp::Duration & period) override;
+            // Chained controller specific methods
+            controller_interface::return_type update_and_write_commands(const rclcpp::Time & time, const rclcpp::Duration & period) override;
+
+            std::vector<hardware_interface::CommandInterface> on_export_reference_interfaces() override;
+
+            bool on_set_chained_mode(bool chained_mode) override;
+
+            controller_interface::return_type update_reference_from_subscribers() override;
 
         private:
             std::shared_ptr<riptide_controller::ParamListener> param_listener_;

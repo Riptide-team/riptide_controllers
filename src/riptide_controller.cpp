@@ -1,6 +1,7 @@
 #include "riptide_controllers/riptide_controller.hpp"
 #include "riptide_controller_parameters.hpp"
-#include "controller_interface/controller_interface.hpp"
+#include "controller_interface/chainable_controller_interface.hpp"
+
 
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include "rclcpp_lifecycle/state.hpp"
@@ -8,6 +9,7 @@
 #include "rclcpp/duration.hpp"
 
 #include "realtime_tools/realtime_buffer.h"
+#include "geometry_msgs/msg/twist_stamped.hpp"
 
 #include <string>
 #include <eigen3/Eigen/Dense>
@@ -17,7 +19,7 @@
 namespace riptide_controllers {
 
     RiptideController::RiptideController() :
-        controller_interface::ControllerInterface(), inv_B(make_inv_B()),
+        controller_interface::ChainableControllerInterface(), inv_B(make_inv_B()),
         rt_command_ptr_(nullptr), twist_command_subscriber_(nullptr) {}
 
     controller_interface::CallbackReturn RiptideController::on_init() {
@@ -56,6 +58,10 @@ namespace riptide_controllers {
             return CallbackReturn::ERROR;
         }
 
+        // Resizing reference interface to size 4 (1 linear velocity, 3 angular velocities)
+        reference_interfaces_.resize(4, std::numeric_limits<double>::quiet_NaN());
+
+        // Creating the control subscriber for non-chained mode
         twist_command_subscriber_ = get_node()->create_subscription<CmdType>(
             "~/cmd_vel", rclcpp::SystemDefaultsQoS(),
             [this](const CmdType::SharedPtr msg) { rt_command_ptr_.writeFromNonRT(msg); }
@@ -93,6 +99,15 @@ namespace riptide_controllers {
         return state_interfaces_config;
     }
 
+    std::vector<hardware_interface::CommandInterface> RiptideController::on_export_reference_interfaces() {
+        std::vector<hardware_interface::CommandInterface> reference_interfaces;
+        reference_interfaces.push_back(hardware_interface::CommandInterface(get_node()->get_name(), "linear_velocity", &reference_interfaces_[0]));
+        reference_interfaces.push_back(hardware_interface::CommandInterface(get_node()->get_name(), "angular_velocity.x", &reference_interfaces_[1]));
+        reference_interfaces.push_back(hardware_interface::CommandInterface(get_node()->get_name(), "angular_velocity.y", &reference_interfaces_[2]));
+        reference_interfaces.push_back(hardware_interface::CommandInterface(get_node()->get_name(), "angular_velocity.z", &reference_interfaces_[3]));
+        return reference_interfaces;
+    }
+
     controller_interface::CallbackReturn RiptideController::on_activate(const rclcpp_lifecycle::State & /*previous_state*/) {
         // reset command buffer if a command came through callback when controller was inactive
         rt_command_ptr_ = realtime_tools::RealtimeBuffer<std::shared_ptr<CmdType>>(nullptr);
@@ -107,35 +122,53 @@ namespace riptide_controllers {
         return CallbackReturn::SUCCESS;
     }
 
-    controller_interface::return_type RiptideController::update(const rclcpp::Time & time, const rclcpp::Duration & /*period*/) {
-
-        RCLCPP_DEBUG(get_node()->get_logger(), "Time difference: %f", (time - last_received_command_time).nanoseconds() * 1e-9);
+    controller_interface::return_type RiptideController::update_reference_from_subscribers() {
 
         // Getting the twist command
-        auto twist_command = rt_command_ptr_.readFromRT();
+        auto twist_command_msg = rt_command_ptr_.readFromRT();
 
         // no command received yet
-        if (!twist_command || !(*twist_command)) {
+        if (!twist_command_msg || !(*twist_command_msg)) {
             return controller_interface::return_type::OK;
         }
 
         // Store time of the received message
-        last_received_command_time = rclcpp::Time((*twist_command)->header.stamp);
+        last_received_command_time = rclcpp::Time((*twist_command_msg)->header.stamp);
+       
+        // Getting linear velocity
+        reference_interfaces_[0] = (*twist_command_msg)->twist.linear.x;
 
-        if ((time - last_received_command_time).nanoseconds() * 1e-9 > params_.command_timeout) {
-            command_interfaces_[0].set_value(0.);
-            command_interfaces_[1].set_value(0.);
-            command_interfaces_[2].set_value(0.);
-            command_interfaces_[3].set_value(0.);
+        // Getting angular velocity
+        reference_interfaces_[1] = (*twist_command_msg)->twist.angular.x;
+        reference_interfaces_[2] = (*twist_command_msg)->twist.angular.y;
+        reference_interfaces_[3] = (*twist_command_msg)->twist.angular.z;
 
+        return controller_interface::return_type::OK;
+    }
+
+    bool RiptideController::on_set_chained_mode(bool chained_mode) {
+        // we can set chained mode in any situation
+        (void)chained_mode;
+        return true;
+    }
+
+    controller_interface::return_type RiptideController::update_and_write_commands(const rclcpp::Time & time, const rclcpp::Duration & /*period*/) {
+
+        // Checking in chained mode if the message is expired 
+        if (is_in_chained_mode() && (time - last_received_command_time).nanoseconds() * 1e-9 > params_.command_timeout) {
+            for (std::size_t i=0; i<4; ++i) {
+                command_interfaces_[i].set_value(0.);
+            }
+
+            RCLCPP_DEBUG(get_node()->get_logger(), "Time difference: %f", (time - last_received_command_time).nanoseconds() * 1e-9);
             RCLCPP_WARN_THROTTLE(get_node()->get_logger(), *(get_node()->get_clock()), 5000, "No Twist received, publishing null control!");
             return controller_interface::return_type::OK;
         }
 
         // Getting the twist command
-        wc_(0) = -(*twist_command)->twist.angular.x;
-        wc_(1) = -(*twist_command)->twist.angular.y;
-        wc_(2) = -(*twist_command)->twist.angular.z;
+        wc_(0) = reference_interfaces_[1];
+        wc_(1) = reference_interfaces_[2];
+        wc_(2) = reference_interfaces_[3];
 
         // Getting actual twist
         Eigen::Vector3d wm_;
@@ -150,7 +183,7 @@ namespace riptide_controllers {
 
         w_ = wc_;
 
-        RCLCPP_DEBUG(get_node()->get_logger(), "Rceived %f / %f %f %f", (*twist_command)->twist.linear.x, (*twist_command)->twist.angular.x, (*twist_command)->twist.angular.y, (*twist_command)->twist.angular.z);
+        RCLCPP_DEBUG(get_node()->get_logger(), "Rceived %f / %f %f %f", reference_interfaces_[0], reference_interfaces_[1], reference_interfaces_[2], reference_interfaces_[3]);
 
         // Generating command
         double v = 1.;
@@ -161,13 +194,12 @@ namespace riptide_controllers {
         }
 
         // Generating the command
-        double u0 = (*twist_command)->twist.linear.x;
-        command_interfaces_[0].set_value(u0);
+        command_interfaces_[0].set_value(reference_interfaces_[0]);
         command_interfaces_[1].set_value(u_(0));
         command_interfaces_[2].set_value(u_(1));
         command_interfaces_[3].set_value(u_(2));
 
-        RCLCPP_DEBUG(get_node()->get_logger(), "Publishing %f %f %f %f", u0, u_(0), u_(1), u_(2));
+        RCLCPP_DEBUG(get_node()->get_logger(), "Publishing %f %f %f %f", reference_interfaces_[0], u_(0), u_(1), u_(2));
         
         return controller_interface::return_type::OK;
     }
@@ -175,4 +207,4 @@ namespace riptide_controllers {
 
 #include "pluginlib/class_list_macros.hpp"
 
-PLUGINLIB_EXPORT_CLASS(riptide_controllers::RiptideController, controller_interface::ControllerInterface)
+PLUGINLIB_EXPORT_CLASS(riptide_controllers::RiptideController, controller_interface::ChainableControllerInterface)

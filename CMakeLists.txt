@@ -28,44 +28,11 @@ foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
   find_package(${Dependency} REQUIRED)
 endforeach()
 
-
-## Tester library
-# tester source files
-list(APPEND test_controllers
-    src/testers/riptide_actuators_tester.cpp
-    src/testers/riptide_battery_card_tester.cpp
-    src/testers/riptide_echosounder_tester.cpp
-    src/testers/riptide_imu_tester.cpp
-    src/testers/riptide_pressure_tester.cpp
-)
-
-# Compile tester library
-add_library(riptide_testers SHARED ${test_controllers})
-target_include_directories(riptide_testers PRIVATE include)
-foreach(filename ${test_controllers})
-  get_filename_component(target_name ${filename} NAME_WE)
-  generate_parameter_library(${target_name}_parameters src/testers/${target_name}.yaml)
-  target_link_libraries(riptide_testers ${target_name}_parameters)
-endforeach()
-ament_target_dependencies(riptide_testers ${THIS_PACKAGE_INCLUDE_DEPENDS})
-
-# Install tester library
-pluginlib_export_plugin_description_file(controller_interface riptide_testers.xml)
-install(
-  TARGETS
-  riptide_testers
-  RUNTIME DESTINATION bin
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-)
-
 ## Broadcaster library
-# tester source files
+# broadcaster source files
 list(APPEND broadcaster_controllers
     src/broadcasters/riptide_pressure_broadcaster.cpp
-    src/broadcasters/riptide_battery_card_broadcaster.cpp
     src/broadcasters/riptide_imu_broadcaster.cpp
-    src/broadcasters/riptide_actuators_broadcaster.cpp
     src/broadcasters/riptide_tail_broadcaster.cpp
 )
 
@@ -90,16 +57,13 @@ install(
 )
 
 ## Riptide controller library
-generate_parameter_library(state_estimator_parameters src/state_estimator.yaml)
 generate_parameter_library(riptide_controller_parameters src/riptide_controller.yaml)
 generate_parameter_library(depth_controller_parameters src/depth_controller.yaml)
 generate_parameter_library(full_riptide_controller_parameters src/full_riptide_controller.yaml)
-generate_parameter_library(actuators_reset_parameters src/actuators_reset.yaml)
-generate_parameter_library(riptide_echosounder_parameters src/riptide_echosounder.yaml)
 
-add_library(${PROJECT_NAME} SHARED src/state_estimator.cpp src/riptide_controller.cpp src/full_riptide_controller.cpp src/riptide_echosounder.cpp src/depth_controller.cpp src/actuators_reset.cpp)
+add_library(${PROJECT_NAME} SHARED src/riptide_controller.cpp src/full_riptide_controller.cpp src/depth_controller.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE include)
-target_link_libraries(${PROJECT_NAME} state_estimator_parameters riptide_controller_parameters riptide_echosounder_parameters depth_controller_parameters full_riptide_controller_parameters actuators_reset_parameters Eigen3::Eigen)
+target_link_libraries(${PROJECT_NAME} riptide_controller_parameters depth_controller_parameters full_riptide_controller_parameters Eigen3::Eigen)
 ament_target_dependencies(${PROJECT_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 pluginlib_export_plugin_description_file(controller_interface riptide_controllers.xml)
@@ -128,6 +92,5 @@ endif()
 
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 ament_export_include_directories(include)
-ament_export_libraries(riptide_testers)
 ament_export_libraries(${PROJECT_NAME})
 ament_package()

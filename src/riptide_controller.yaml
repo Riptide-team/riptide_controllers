@@ -1,4 +1,9 @@
 riptide_controller:
+  prefix: {
+    type: string,
+    description: "Specifies the prefix of the robot",
+    read_only: true
+  }
   d_joint: {
     type: string,
     description: "Specifies which joints will be used by the controller for the d fin.",

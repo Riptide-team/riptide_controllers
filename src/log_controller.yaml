@@ -1,0 +1,26 @@
+log_controller:
+  linear_velocity_x_joint: {
+    type: string,
+    description: "Specifies which joints will be used by the controller for the x linear velocity.",
+    read_only: true
+  }
+  angular_velocity_x_joint: {
+    type: string,
+    description: "Specifies which joints will be used by the controller for the x angular velocity.",
+    read_only: true
+  }
+  angular_velocity_y_joint: {
+    type: string,
+    description: "Specifies which joints will be used by the controller for the y angular velocity.",
+    read_only: true
+  }
+  angular_velocity_z_joint: {
+    type: string,
+    description: "Specifies which joints will be used by the controller for the z angular velocity.",
+    read_only: true
+  }
+  imu_name: {
+    type: string,
+    description: "Specifies the imu name which will be claimed by the controller",
+    read_only: true
+  }

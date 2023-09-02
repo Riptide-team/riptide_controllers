@@ -61,6 +61,10 @@ namespace riptide_controllers {
         // Resizing reference interface to size 4 (1 linear velocity, 3 angular velocities)
         reference_interfaces_.resize(4, std::numeric_limits<double>::quiet_NaN());
 
+        // Configuring controller state publisher
+        controller_state_publisher_ = get_node()->create_publisher<ControllerStateType>("~/controller_state", rclcpp::SystemDefaultsQoS());
+        rt_controller_state_publisher_ = std::make_unique<realtime_tools::RealtimePublisher<ControllerStateType>>(controller_state_publisher_);
+
         // Creating the control subscriber for non-chained mode
         twist_command_subscriber_ = get_node()->create_subscription<CmdType>(
             "~/cmd_vel", rclcpp::SystemDefaultsQoS(),
@@ -77,12 +81,19 @@ namespace riptide_controllers {
         controller_interface::InterfaceConfiguration command_interfaces_config;
         command_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
 
-        std::string prefix = std::string(get_node()->get_namespace()).substr(1);
+        // Adding prefix if specified
+        std::string prefix;
+        if (params_.prefix.empty()) {
+            prefix = "";
+        }
+        else {
+            prefix = params_.prefix + "_";
+        }
 
-        command_interfaces_config.names.push_back(prefix + "_" + params_.thruster_joint + "/velocity");
-        command_interfaces_config.names.push_back(prefix + "_" + params_.d_joint + "/position");
-        command_interfaces_config.names.push_back(prefix + "_" + params_.p_joint + "/position");
-        command_interfaces_config.names.push_back(prefix + "_" + params_.s_joint + "/position");
+        command_interfaces_config.names.push_back(prefix + params_.thruster_joint + "/velocity");
+        command_interfaces_config.names.push_back(prefix + params_.d_joint + "/position");
+        command_interfaces_config.names.push_back(prefix + params_.p_joint + "/position");
+        command_interfaces_config.names.push_back(prefix + params_.s_joint + "/position");
         return command_interfaces_config;
     }
 
@@ -91,17 +102,24 @@ namespace riptide_controllers {
         state_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
         std::vector<std::string> coords = {"x", "y", "z"};
 
-        std::string prefix = std::string(get_node()->get_namespace()).substr(1);
+        // Adding prefix if specified
+        std::string prefix;
+        if (params_.prefix.empty()) {
+            prefix = "";
+        }
+        else {
+            prefix = params_.prefix + "_";
+        }
 
         for (const auto &c: coords) {
-            state_interfaces_config.names.push_back(prefix + "_" + params_.imu_name + "/angular_velocity." + c);
+            state_interfaces_config.names.push_back(prefix + params_.imu_name + "/angular_velocity." + c);
         }
         return state_interfaces_config;
     }
 
     std::vector<hardware_interface::CommandInterface> RiptideController::on_export_reference_interfaces() {
         std::vector<hardware_interface::CommandInterface> reference_interfaces;
-        reference_interfaces.push_back(hardware_interface::CommandInterface(get_node()->get_name(), "linear_velocity", &reference_interfaces_[0]));
+        reference_interfaces.push_back(hardware_interface::CommandInterface(get_node()->get_name(), "linear_velocity.x", &reference_interfaces_[0]));
         reference_interfaces.push_back(hardware_interface::CommandInterface(get_node()->get_name(), "angular_velocity.x", &reference_interfaces_[1]));
         reference_interfaces.push_back(hardware_interface::CommandInterface(get_node()->get_name(), "angular_velocity.y", &reference_interfaces_[2]));
         reference_interfaces.push_back(hardware_interface::CommandInterface(get_node()->get_name(), "angular_velocity.z", &reference_interfaces_[3]));
@@ -112,12 +130,32 @@ namespace riptide_controllers {
         // reset command buffer if a command came through callback when controller was inactive
         rt_command_ptr_ = realtime_tools::RealtimeBuffer<std::shared_ptr<CmdType>>(nullptr);
 
+        // Setting reference values to 0.
+        for (std::size_t i=0; i<4; ++i) {
+            reference_interfaces_[i] = 0.;
+        }
+
+        // Setting control values to 0.
+        for (std::size_t i=0; i<4; ++i) {
+            command_interfaces_[i].set_value(0.);
+        }
+
         return CallbackReturn::SUCCESS;
     }
 
     controller_interface::CallbackReturn RiptideController::on_deactivate(const rclcpp_lifecycle::State & /*previous_state*/) {
         // reset command buffer
         rt_command_ptr_ = realtime_tools::RealtimeBuffer<std::shared_ptr<CmdType>>(nullptr);
+
+        // Setting reference values to quiet_NaN.
+        for (std::size_t i=0; i<4; ++i) {
+            reference_interfaces_[i] = std::numeric_limits<double>::quiet_NaN();
+        }
+
+        // Setting control values to quiet_NaN.
+        for (std::size_t i=0; i<4; ++i) {
+            command_interfaces_[i].set_value(std::numeric_limits<double>::quiet_NaN());
+        }
 
         return CallbackReturn::SUCCESS;
     }
@@ -161,7 +199,7 @@ namespace riptide_controllers {
             }
 
             RCLCPP_DEBUG(get_node()->get_logger(), "Time difference: %f", (time - last_received_command_time).nanoseconds() * 1e-9);
-            RCLCPP_WARN_THROTTLE(get_node()->get_logger(), *(get_node()->get_clock()), 5000, "No Twist received, publishing null control!");
+            RCLCPP_WARN_THROTTLE(get_node()->get_logger(), *(get_node()->get_clock()), 5000, "No Twist received, publishing null control!");                        
             return controller_interface::return_type::OK;
         }
 
@@ -200,6 +238,19 @@ namespace riptide_controllers {
         command_interfaces_[3].set_value(u_(2));
 
         RCLCPP_DEBUG(get_node()->get_logger(), "Publishing %f %f %f %f", reference_interfaces_[0], u_(0), u_(1), u_(2));
+
+        // Publishing controller state
+        rt_controller_state_publisher_->lock();
+        rt_controller_state_publisher_->msg_.header.stamp = time;
+        rt_controller_state_publisher_->msg_.reference.linear.x = reference_interfaces_[0];
+        rt_controller_state_publisher_->msg_.reference.angular.x = reference_interfaces_[1];
+        rt_controller_state_publisher_->msg_.reference.angular.y = reference_interfaces_[2];
+        rt_controller_state_publisher_->msg_.reference.angular.z = reference_interfaces_[3];
+        rt_controller_state_publisher_->msg_.thruster_joint = command_interfaces_[0].get_value();
+        rt_controller_state_publisher_->msg_.d_joint = command_interfaces_[1].get_value();
+        rt_controller_state_publisher_->msg_.p_joint = command_interfaces_[2].get_value();
+        rt_controller_state_publisher_->msg_.s_joint = command_interfaces_[3].get_value();
+        rt_controller_state_publisher_->unlockAndPublish();
         
         return controller_interface::return_type::OK;
     }

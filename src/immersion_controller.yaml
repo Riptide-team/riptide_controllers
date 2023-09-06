@@ -36,3 +36,15 @@ immersion_controller:
     read_only: true,
     default_value: 2.
   }
+  thruster_velocity: {
+    type: double,
+    description: "Specifies the thruster velocity between -1 and 1",
+    read_only: true,
+    default_value: 1.
+  }
+  fin_angle: {
+    type: double,
+    description: "Specifies the fin angle to be applied on each phases",
+    read_only: true,
+    default_value: 0.5
+  }

@@ -166,17 +166,17 @@ namespace riptide_controllers {
 
                 else if (time > immersion_start_time_ + *phase_1_duration_) {
                     // Going upwards
-                    command_interfaces_[0].set_value(400.0);
+                    command_interfaces_[0].set_value(params_.thruster_velocity);
                     command_interfaces_[1].set_value(0.);
-                    command_interfaces_[2].set_value(-0.5);
-                    command_interfaces_[3].set_value(0.5);
+                    command_interfaces_[2].set_value(-params_.fin_angle);
+                    command_interfaces_[3].set_value(params_.fin_angle);
                 }
                 else {
                     // Going downwards
-                    command_interfaces_[0].set_value(400.0);
+                    command_interfaces_[0].set_value(params_.thruster_velocity);
                     command_interfaces_[1].set_value(0.);
-                    command_interfaces_[2].set_value(0.5);
-                    command_interfaces_[3].set_value(-0.5);
+                    command_interfaces_[2].set_value(params_.fin_angle);
+                    command_interfaces_[3].set_value(-params_.fin_angle);
                 }
 
                 // Publish feedback

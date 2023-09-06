@@ -39,11 +39,9 @@ riptide_controller:
     type: double,
     default_value: 1.,
     description: "Specifies the max control angle of fins",
-    read_only: true
   }
   r_fin: {
     type: double,
     default_value: .05,
     description: "Specifies the typical range of action of fins",
-    read_only: true
   }

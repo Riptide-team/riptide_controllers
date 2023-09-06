@@ -10,18 +10,17 @@
 
 #include "realtime_tools/realtime_buffer.h"
 
-#include <string>
+#include <chrono>
 #include <cmath>
+#include <string>
 
 namespace riptide_controllers {
 
-    ImmersionController::ImmersionController() :
-        controller_interface::ControllerInterface(),
-        rt_command_ptr_(nullptr), quaternion_command_subscriber_(nullptr) {}
+    ImmersionController::ImmersionController() : controller_interface::ControllerInterface() {}
 
     controller_interface::CallbackReturn ImmersionController::on_init() {
         try {
-            param_listener_ = std::make_shared<log_controller::ParamListener>(get_node());
+            param_listener_ = std::make_shared<immersion_controller::ParamListener>(get_node());
             params_ = param_listener_->get_params();
         }
         catch (const std::exception & e) {
@@ -49,14 +48,26 @@ namespace riptide_controllers {
             RCLCPP_ERROR(get_node()->get_logger(), "'s_joint' parameter has to be specified.");
             return CallbackReturn::ERROR;
         }
-        if (params_.imu_name.empty()) {
-            RCLCPP_ERROR(get_node()->get_logger(), "'imu_name' parameter has to be specified.");
-            return CallbackReturn::ERROR;
-        }
-        if (params_.pressure_name.empty()) {
-            RCLCPP_ERROR(get_node()->get_logger(), "'pressure_name' parameter has to be specified.");
-            return CallbackReturn::ERROR;
-        }
+
+        // Init phase_1_duration
+        RCLCPP_DEBUG(get_node()->get_logger(), "Phase 1 duration: %f", params_.phase_1_duration);
+        phase_1_duration_ = std::make_unique<rclcpp::Duration>(std::chrono::nanoseconds(static_cast<std::int64_t>(params_.phase_1_duration * 1e9)));
+
+        // Init phase_2_duration
+        RCLCPP_DEBUG(get_node()->get_logger(), "Phase 2 duration: %f", params_.phase_2_duration);
+        phase_2_duration_ = std::make_unique<rclcpp::Duration>(std::chrono::nanoseconds(static_cast<std::int64_t>(params_.phase_2_duration * 1e9)));
+
+        // Init goal handle
+        goal_handle_ = nullptr;
+
+        // Init Depth action
+        action_server_ = rclcpp_action::create_server<Action>(
+            get_node(),
+            "immerse",
+            std::bind(&ImmersionController::handle_goal, this, std::placeholders::_1, std::placeholders::_2),
+            std::bind(&ImmersionController::handle_cancel, this, std::placeholders::_1),
+            std::bind(&ImmersionController::handle_accepted, this, std::placeholders::_1)
+        );
 
         RCLCPP_DEBUG(get_node()->get_logger(), "configure successful");
         return CallbackReturn::SUCCESS;
@@ -66,85 +77,143 @@ namespace riptide_controllers {
         controller_interface::InterfaceConfiguration command_interfaces_config;
         command_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
 
-        command_interfaces_config.names.push_back(params_.thruster_joint);
-        command_interfaces_config.names.push_back(params_.d_joint);
-        command_interfaces_config.names.push_back(params_.p_joint);
-        command_interfaces_config.names.push_back(params_.s_joint);
+        // Adding prefix if specified
+        std::string prefix;
+        if (params_.prefix.empty()) {
+            prefix = "";
+        }
+        else {
+            prefix = params_.prefix + "_";
+        }
+
+        command_interfaces_config.names.push_back(prefix + params_.thruster_joint + "/velocity");
+        command_interfaces_config.names.push_back(prefix + params_.d_joint + "/position");
+        command_interfaces_config.names.push_back(prefix + params_.p_joint + "/position");
+        command_interfaces_config.names.push_back(prefix + params_.s_joint + "/position");
         return command_interfaces_config;
     }
 
     controller_interface::InterfaceConfiguration ImmersionController::state_interface_configuration() const {
         controller_interface::InterfaceConfiguration state_interfaces_config;
-        state_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
-        std::vector<std::string> coords = {"x", "y", "z", "w"};
-
-        std::string prefix = std::string(get_node()->get_namespace()).substr(1);
-
-        for (const auto &c: coords) {
-            state_interfaces_config.names.push_back(params_.imu_name + "/orientation." + c);
-        }
-
-        state_interfaces_config.names.push_back(params_.pressure_name + "/depth");
-
+        state_interfaces_config.type = controller_interface::interface_configuration_type::NONE;
         return state_interfaces_config;
     }
 
     controller_interface::CallbackReturn ImmersionController::on_activate(const rclcpp_lifecycle::State & /*previous_state*/) {
-        // reset command buffer if a command came through callback when controller was inactive
-        rt_command_ptr_ = realtime_tools::RealtimeBuffer<std::shared_ptr<CmdType>>(nullptr);
+        goal_handle_ = nullptr;
+
+        // Setting null commands
+        command_interfaces_[0].set_value(0.);
+        command_interfaces_[1].set_value(0.);
+        command_interfaces_[2].set_value(0.);
+        command_interfaces_[3].set_value(0.);
 
         return CallbackReturn::SUCCESS;
     }
 
     controller_interface::CallbackReturn ImmersionController::on_deactivate(const rclcpp_lifecycle::State & /*previous_state*/) {
-        // reset command buffer
-        rt_command_ptr_ = realtime_tools::RealtimeBuffer<std::shared_ptr<CmdType>>(nullptr);
+        goal_handle_ = nullptr;
+
+        // Setting quiet_nan commands
+        command_interfaces_[0].set_value(std::numeric_limits<double>::quiet_NaN());
+        command_interfaces_[1].set_value(std::numeric_limits<double>::quiet_NaN());
+        command_interfaces_[2].set_value(std::numeric_limits<double>::quiet_NaN());
+        command_interfaces_[3].set_value(std::numeric_limits<double>::quiet_NaN());
 
         return CallbackReturn::SUCCESS;
     }
 
-    controller_interface::return_type ImmersionController::update(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) {
+    controller_interface::return_type ImmersionController::update(const rclcpp::Time & time, const rclcpp::Duration & /*period*/) {
+        std::scoped_lock lock(goal_mutex_);
 
-        // // Getting the desired orientation command
-        // auto quaternion_desired_msg = rt_command_ptr_.readFromRT();
+        current_time_ = time;
 
-        // // no command received yet
-        // if (!quaternion_desired_msg || !(*quaternion_desired_msg)) {
-        //     return controller_interface::return_type::OK;
-        // }
+        if (goal_handle_ != nullptr) {
 
-        // // Getting wanted orientation
-        // qw_.x() = (*quaternion_desired_msg)->x;
-        // qw_.y() = (*quaternion_desired_msg)->y;
-        // qw_.z() = (*quaternion_desired_msg)->z;
-        // qw_.w() = (*quaternion_desired_msg)->w;
+            // Check if the goal is canceled
+            if (goal_handle_->is_canceling()) {
 
-        // RCLCPP_DEBUG(get_node()->get_logger(), "Desired quaternion: %f %f %f %f", qw_.x(), qw_.y(), qw_.z(), qw_.w());
+                // Publishing result
+                auto result = std::make_shared<Action::Result>();
+                result->final_duration = (time - immersion_start_time_).seconds();
+                goal_handle_->canceled(result);
 
-        // // Getting current orientation
-        // q_.x() = state_interfaces_[0].get_value();
-        // q_.y() = state_interfaces_[1].get_value();
-        // q_.z() = state_interfaces_[2].get_value();
-        // q_.w() = state_interfaces_[3].get_value();
+                // Publishing null commands
+                command_interfaces_[0].set_value(0.);
+                command_interfaces_[1].set_value(0.);
+                command_interfaces_[2].set_value(0.);
+                command_interfaces_[3].set_value(0.);
 
-        // RCLCPP_DEBUG(get_node()->get_logger(), "Current quaternion: %f %f %f %f", q_.x(), q_.y(), q_.z(), q_.w());
+                return controller_interface::return_type::OK;
+            }
 
-        // // Log control coputing
-        // Eigen::Matrix3d Rr(q_);
-        // Eigen::Matrix3d Rw(qw_);
-        // // TODO add skew inv
-        // Eigen::Vector3d w = Rr.transpose() * SkewInv((Rw * Rr.transpose()).log());
+            if (goal_handle_->is_executing()) {
 
-        // // Generating the command
-        // command_interfaces_[0].set_value(state_interfaces_[0].get_value());
-        // command_interfaces_[1].set_value(w(0));
-        // command_interfaces_[2].set_value(w(1));
-        // command_interfaces_[3].set_value(w(2));
+                // Check if the action is finished
+                if (time > immersion_start_time_ + *phase_1_duration_ + *phase_2_duration_) {
+                    // Publishing result
+                    auto result = std::make_shared<Action::Result>();
+                    goal_handle_->succeed(result);
 
-        RCLCPP_DEBUG(get_node()->get_logger(), "Publishing %f %f %f %f", state_interfaces_[0].get_value(), w(0), w(1), w(2));
-        
+                     // Publishing null commands
+                    command_interfaces_[0].set_value(0.);
+                    command_interfaces_[1].set_value(0.);
+                    command_interfaces_[2].set_value(0.);
+                    command_interfaces_[3].set_value(0.);
+
+                    return controller_interface::return_type::OK;
+                }
+
+                else if (time > immersion_start_time_ + *phase_1_duration_) {
+                    // Going upwards
+                    command_interfaces_[0].set_value(400.0);
+                    command_interfaces_[1].set_value(0.);
+                    command_interfaces_[2].set_value(-0.5);
+                    command_interfaces_[3].set_value(0.5);
+                }
+                else {
+                    // Going downwards
+                    command_interfaces_[0].set_value(400.0);
+                    command_interfaces_[1].set_value(0.);
+                    command_interfaces_[2].set_value(0.5);
+                    command_interfaces_[3].set_value(-0.5);
+                }
+
+                // Publish feedback
+                auto feedback = std::make_shared<Action::Feedback>();
+                feedback->remaining_time = std::max(0., (*phase_1_duration_ + *phase_2_duration_ + time - immersion_start_time_).seconds());
+                goal_handle_->publish_feedback(feedback);
+                return controller_interface::return_type::OK;
+            }
+        }
+
+        // Publishing null commands
+        command_interfaces_[0].set_value(0.);
+        command_interfaces_[1].set_value(0.);
+        command_interfaces_[2].set_value(0.);
+        command_interfaces_[3].set_value(0.);
         return controller_interface::return_type::OK;
     }
+
+    rclcpp_action::GoalResponse ImmersionController::handle_goal(const rclcpp_action::GoalUUID & uuid, std::shared_ptr<const Action::Goal> /*goal*/) {
+        // Handle goal
+        (void)uuid;
+        return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
+    }
+
+    rclcpp_action::CancelResponse ImmersionController::handle_cancel(const std::shared_ptr<GoalHandle> goal_handle) {
+        RCLCPP_INFO(get_node()->get_logger(), "Received request to cancel goal");
+        (void)goal_handle;
+        return rclcpp_action::CancelResponse::ACCEPT;
+    }
+
+    void ImmersionController::handle_accepted(const std::shared_ptr<GoalHandle> goal_handle) {
+        RCLCPP_INFO(get_node()->get_logger(), "Handle accepted");
+        std::scoped_lock lock(goal_mutex_);
+        goal_handle_ = goal_handle;
+        immersion_start_time_ = current_time_;
+    }
+    
 } // riptide_controllers
 
 #include "pluginlib/class_list_macros.hpp"

@@ -1,4 +1,9 @@
 log_controller:
+  prefix: {
+    type: string,
+    description: "Specifies the prefix of the robot",
+    read_only: true
+  }
   linear_velocity_x_joint: {
     type: string,
     description: "Specifies which joints will be used by the controller for the x linear velocity.",
@@ -22,5 +27,11 @@ log_controller:
   imu_name: {
     type: string,
     description: "Specifies the imu name which will be claimed by the controller",
+    read_only: true
+  }
+  thruster_velocity: {
+    type: double,
+    description: "Specifies the thruster velocity used in the control law.",
+    default_value: .5,
     read_only: true
   }

@@ -10,6 +10,7 @@
 
 #include "realtime_tools/realtime_buffer.h"
 #include "geometry_msgs/msg/twist_stamped.hpp"
+#include "geometry_msgs/msg/twist.hpp"
 
 #include <string>
 #include <eigen3/Eigen/Dense>
@@ -167,19 +168,20 @@ namespace riptide_controllers {
 
         // no command received yet
         if (!twist_command_msg || !(*twist_command_msg)) {
+            RCLCPP_DEBUG_STREAM(get_node()->get_logger(), "No Twist received, publishing null control!");
             return controller_interface::return_type::OK;
         }
 
         // Store time of the received message
-        last_received_command_time = rclcpp::Time((*twist_command_msg)->header.stamp);
+        last_received_command_time = this->get_node()->get_clock()->now();
        
         // Getting linear velocity
-        reference_interfaces_[0] = (*twist_command_msg)->twist.linear.x;
+        reference_interfaces_[0] = (*twist_command_msg)->linear.x;
 
         // Getting angular velocity
-        reference_interfaces_[1] = (*twist_command_msg)->twist.angular.x;
-        reference_interfaces_[2] = (*twist_command_msg)->twist.angular.y;
-        reference_interfaces_[3] = (*twist_command_msg)->twist.angular.z;
+        reference_interfaces_[1] = (*twist_command_msg)->angular.x;
+        reference_interfaces_[2] = (*twist_command_msg)->angular.y;
+        reference_interfaces_[3] = (*twist_command_msg)->angular.z;
 
         return controller_interface::return_type::OK;
     }
@@ -193,15 +195,15 @@ namespace riptide_controllers {
     controller_interface::return_type RiptideController::update_and_write_commands(const rclcpp::Time & time, const rclcpp::Duration & /*period*/) {
 
         // Checking in chained mode if the message is expired 
-        if (is_in_chained_mode() && (time - last_received_command_time).nanoseconds() * 1e-9 > params_.command_timeout) {
-            for (std::size_t i=0; i<4; ++i) {
-                command_interfaces_[i].set_value(0.);
-            }
+        // if (!is_in_chained_mode() && (time - last_received_command_time).nanoseconds() * 1e-9 > params_.command_timeout) {
+        //     for (std::size_t i=0; i<4; ++i) {
+        //         command_interfaces_[i].set_value(0.);
+        //     }
 
-            RCLCPP_DEBUG(get_node()->get_logger(), "Time difference: %f", (time - last_received_command_time).nanoseconds() * 1e-9);
-            RCLCPP_WARN_THROTTLE(get_node()->get_logger(), *(get_node()->get_clock()), 5000, "No Twist received, publishing null control!");                        
-            return controller_interface::return_type::OK;
-        }
+        //     RCLCPP_DEBUG(get_node()->get_logger(), "Time difference: %f", (time - last_received_command_time).nanoseconds() * 1e-9);
+        //     RCLCPP_WARN_THROTTLE(get_node()->get_logger(), *(get_node()->get_clock()), 5000, "No Twist received, publishing null control!");                        
+        //     return controller_interface::return_type::OK;
+        // }
 
         // Getting the twist command
         wc_(0) = reference_interfaces_[1];

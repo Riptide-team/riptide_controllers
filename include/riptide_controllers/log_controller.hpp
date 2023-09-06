@@ -5,7 +5,9 @@
 #include <string>
 
 #include "realtime_tools/realtime_buffer.h"
+#include "realtime_tools/realtime_publisher.h"
 #include "geometry_msgs/msg/quaternion.hpp"
+#include "riptide_msgs/msg/log_controller_state.hpp"
 
 #include <eigen3/Eigen/Dense>
 
@@ -21,6 +23,7 @@ namespace riptide_controllers {
     class LogController : public controller_interface::ControllerInterface {
         public:
 
+            using ControllerStateType = riptide_msgs::msg::LogControllerState;
             using CmdType = geometry_msgs::msg::Quaternion;
 
             LogController();
@@ -53,6 +56,10 @@ namespace riptide_controllers {
             // Desired orientation subscriber
             realtime_tools::RealtimeBuffer<std::shared_ptr<CmdType>> rt_command_ptr_;
             rclcpp::Subscription<CmdType>::SharedPtr quaternion_command_subscriber_;
+
+            // Controller state publisher
+            rclcpp::Publisher<ControllerStateType>::SharedPtr controller_state_publisher_;
+            std::unique_ptr<realtime_tools::RealtimePublisher<ControllerStateType>> rt_controller_state_publisher_;
     };
 
 } // riptide_controllers

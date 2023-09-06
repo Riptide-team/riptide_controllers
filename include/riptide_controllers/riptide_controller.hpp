@@ -6,7 +6,7 @@
 
 #include "realtime_tools/realtime_buffer.h"
 #include "realtime_tools/realtime_publisher.h"
-#include "geometry_msgs/msg/twist_stamped.hpp"
+#include "geometry_msgs/msg/twist.hpp"
 #include "riptide_msgs/msg/riptide_controller_state.hpp"
 
 #include <eigen3/Eigen/Dense>
@@ -16,8 +16,8 @@ namespace riptide_controllers {
     class RiptideController : public controller_interface::ChainableControllerInterface {
         public:
             using ControllerStateType = riptide_msgs::msg::RiptideControllerState;
-            using CmdType = geometry_msgs::msg::TwistStamped;
-            using FeedbackType = geometry_msgs::msg::TwistStamped;
+            using CmdType = geometry_msgs::msg::Twist;
+            using FeedbackType = geometry_msgs::msg::Twist;
 
             RiptideController();
 

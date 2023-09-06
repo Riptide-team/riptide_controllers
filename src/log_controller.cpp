@@ -10,6 +10,7 @@
 
 #include "realtime_tools/realtime_buffer.h"
 #include "geometry_msgs/msg/quaternion.hpp"
+#include "riptide_msgs/msg/log_controller_state.hpp"
 
 #include <string>
 #include <eigen3/Eigen/Dense>
@@ -57,6 +58,10 @@ namespace riptide_controllers {
             return CallbackReturn::ERROR;
         }
 
+        // Configuring controller state publisher
+        controller_state_publisher_ = get_node()->create_publisher<ControllerStateType>("~/controller_state", rclcpp::SystemDefaultsQoS());
+        rt_controller_state_publisher_ = std::make_unique<realtime_tools::RealtimePublisher<ControllerStateType>>(controller_state_publisher_);
+
         // Creating the control subscriber for non-chained mode
         quaternion_command_subscriber_ = get_node()->create_subscription<CmdType>(
             "~/desired_orientation", rclcpp::SystemDefaultsQoS(),
@@ -71,8 +76,6 @@ namespace riptide_controllers {
         controller_interface::InterfaceConfiguration command_interfaces_config;
         command_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
 
-        std::string prefix = std::string(get_node()->get_namespace()).substr(1);
-
         command_interfaces_config.names.push_back(params_.linear_velocity_x_joint);
         command_interfaces_config.names.push_back(params_.angular_velocity_x_joint);
         command_interfaces_config.names.push_back(params_.angular_velocity_y_joint);
@@ -85,10 +88,17 @@ namespace riptide_controllers {
         state_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
         std::vector<std::string> coords = {"x", "y", "z", "w"};
 
-        std::string prefix = std::string(get_node()->get_namespace()).substr(1);
+        // Adding prefix if specified
+        std::string prefix;
+        if (params_.prefix.empty()) {
+            prefix = "";
+        }
+        else {
+            prefix = params_.prefix + "_";
+        }
 
         for (const auto &c: coords) {
-            state_interfaces_config.names.push_back(prefix + "_" + params_.imu_name + "/orientation." + c);
+            state_interfaces_config.names.push_back(prefix + params_.imu_name + "/orientation." + c);
         }
         return state_interfaces_config;
     }
@@ -107,7 +117,7 @@ namespace riptide_controllers {
         return CallbackReturn::SUCCESS;
     }
 
-    controller_interface::return_type LogController::update(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) {
+    controller_interface::return_type LogController::update(const rclcpp::Time & time, const rclcpp::Duration & /*period*/) {
 
         // Getting the desired orientation command
         auto quaternion_desired_msg = rt_command_ptr_.readFromRT();
@@ -140,12 +150,37 @@ namespace riptide_controllers {
         Eigen::Vector3d w = Rr.transpose() * SkewInv((Rw * Rr.transpose()).log());
 
         // Generating the command
-        command_interfaces_[0].set_value(state_interfaces_[0].get_value());
+        command_interfaces_[0].set_value(params_.thruster_velocity);
         command_interfaces_[1].set_value(w(0));
         command_interfaces_[2].set_value(w(1));
         command_interfaces_[3].set_value(w(2));
 
         RCLCPP_DEBUG(get_node()->get_logger(), "Publishing %f %f %f %f", state_interfaces_[0].get_value(), w(0), w(1), w(2));
+
+        rt_controller_state_publisher_->lock();
+        rt_controller_state_publisher_->msg_.header.stamp = time;
+
+        rt_controller_state_publisher_->msg_.reference.x = qw_.x();
+        rt_controller_state_publisher_->msg_.reference.y = qw_.y();
+        rt_controller_state_publisher_->msg_.reference.z = qw_.z();
+        rt_controller_state_publisher_->msg_.reference.w = qw_.w();
+
+        rt_controller_state_publisher_->msg_.feedback.x = state_interfaces_[0].get_value();
+        rt_controller_state_publisher_->msg_.feedback.y = state_interfaces_[1].get_value();
+        rt_controller_state_publisher_->msg_.feedback.z = state_interfaces_[2].get_value();
+        rt_controller_state_publisher_->msg_.feedback.w = state_interfaces_[3].get_value();
+
+        Eigen::Quaterniond error = q_.inverse() * qw_;
+        rt_controller_state_publisher_->msg_.error.x = error.x();
+        rt_controller_state_publisher_->msg_.error.y = error.y();
+        rt_controller_state_publisher_->msg_.error.z = error.z();
+        rt_controller_state_publisher_->msg_.error.w = error.w();
+        rt_controller_state_publisher_->msg_.angular_error = 2 * std::atan2(error.vec().norm(), error.w());
+
+        rt_controller_state_publisher_->msg_.output.x = command_interfaces_[0].get_value();
+        rt_controller_state_publisher_->msg_.output.y = command_interfaces_[1].get_value();
+        rt_controller_state_publisher_->msg_.output.z = command_interfaces_[2].get_value();
+        rt_controller_state_publisher_->unlockAndPublish();
         
         return controller_interface::return_type::OK;
     }

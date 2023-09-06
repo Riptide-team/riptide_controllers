@@ -20,7 +20,7 @@ namespace riptide_controllers {
             using Action = riptide_msgs::action::Depth;
             using GoalHandle = rclcpp_action::ServerGoalHandle<Action>;
 
-            using ImmerseAction = riptide_msgs::action::Immerse;
+            using ImmerseAction = riptide_msgs::action::Immersea;
             using ImmerseGoalHandle = rclcpp_action::ServerGoalHandle<ImmerseAction>;
 
             DepthController() : controller_interface::ControllerInterface() {};

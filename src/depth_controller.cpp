@@ -148,7 +148,7 @@ namespace riptide_controllers {
                 command_interfaces_[3].set_value(state_interfaces_[3].get_value());
                 command_interfaces_[4].set_value(state_interfaces_[4].get_value());
 
-                result = std::make_shared<Action::Result>();
+                auto result = std::make_shared<Action::Result>();
                 result->depth = state_interfaces_[0].get_value();
                 // result->duration = rclcpp::Duration(goal_handle_->get_goal()->duration->sec, goal_handle_->get_goal()->duration->nanosec);
                 goal_handle_->canceled(result);
@@ -160,7 +160,7 @@ namespace riptide_controllers {
             if (goal_handle_->is_executing()) {
 
                 // Check if the timeout is expired -> if so, succeed the goal
-                if (time - action_start_time_ > rclcpp::Duration(goal_handle_->get_goal()->duration->sec, goal_handle_->get_goal()->duration->nanosec)) {
+                if (time - action_start_time_ > rclcpp::Duration(goal_handle_->get_goal()->timeout.sec, goal_handle_->get_goal()->timeout.nanosec)) {
                     // Setting null velocity and identity orientation
                     command_interfaces_[0].set_value(0);
                     command_interfaces_[1].set_value(state_interfaces_[1].get_value());
@@ -168,7 +168,7 @@ namespace riptide_controllers {
                     command_interfaces_[3].set_value(state_interfaces_[3].get_value());
                     command_interfaces_[4].set_value(state_interfaces_[4].get_value());
 
-                    result = std::make_shared<Action::Result>();
+                    auto result = std::make_shared<Action::Result>();
                     result->depth = state_interfaces_[0].get_value();
                     result->duration = time - action_start_time_;
                     goal_handle_->succeed(result);
@@ -181,7 +181,7 @@ namespace riptide_controllers {
                     double depth_error = goal_handle_->get_goal()->depth - state_interfaces_[0].get_value();
 
                     // Computing wanted pitch
-                    double wanted_pitch = params.K * std::atan(depth_error / params_.r);
+                    double wanted_pitch = params_.K * std::atan(depth_error / params_.r);
 
                     // Building wanted command orientation from euler angles
                     Eigen::AngleAxisd yawAngle(params_.yaw, Eigen::Vector3d::UnitZ());
@@ -220,12 +220,12 @@ namespace riptide_controllers {
         }
 
         // Checking duration > 0
-        if (static_cast<double>(goal->duration->sec + 1e9 * goal->duration->nanosec) < 0.) {
+        if (static_cast<double>(goal->timeout.sec + 1e9 * goal->timeout.nanosec) < 0.) {
             RCLCPP_ERROR(get_node()->get_logger(), "Requested duration must be positive");
             return rclcpp_action::GoalResponse::REJECT;
         }
 
-        RCLCPP_INFO(get_node()->get_logger(), "Requested action: depth=%fm, duration=%fs", goal->depth, static_cast<double>(goal->duration->sec + 1e9 * goal->duration->nanosec));
+        RCLCPP_INFO(get_node()->get_logger(), "Requested action: depth=%fm, duration=%fs", goal->depth, static_cast<double>(goal->timeout.sec + 1e9 * goal->timeout.nanosec));
         (void)uuid;
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
     }

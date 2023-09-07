@@ -47,6 +47,10 @@ namespace riptide_controllers {
             return CallbackReturn::ERROR;
         }
 
+        // Configuring controller state publisher
+        controller_state_publisher_ = get_node()->create_publisher<ControllerStateType>("~/controller_state", rclcpp::SystemDefaultsQoS());
+        rt_controller_state_publisher_ = std::make_unique<realtime_tools::RealtimePublisher<ControllerStateType>>(controller_state_publisher_);
+
         // Init Depth action
         action_server_ = rclcpp_action::create_server<Action>(
             get_node(),
@@ -155,6 +159,20 @@ namespace riptide_controllers {
                 result->duration.nanosec = total_duration.nanoseconds();
                 goal_handle_->canceled(result);
                 goal_handle_ = nullptr;
+
+                // Publishing controller state
+                rt_controller_state_publisher_->lock();
+                rt_controller_state_publisher_->msg_.header.stamp = time;
+                rt_controller_state_publisher_->msg_.reference_depth = 0.;
+                rt_controller_state_publisher_->msg_.feedback_depth = state_interfaces_[0].get_value();
+                rt_controller_state_publisher_->msg_.error_depth = - state_interfaces_[0].get_value();
+                rt_controller_state_publisher_->msg_.velocity_output = 0.;
+                rt_controller_state_publisher_->msg_.output.x = state_interfaces_[1].get_value();
+                rt_controller_state_publisher_->msg_.output.y = state_interfaces_[2].get_value();
+                rt_controller_state_publisher_->msg_.output.z = state_interfaces_[3].get_value();
+                rt_controller_state_publisher_->msg_.output.w = state_interfaces_[4].get_value();
+                rt_controller_state_publisher_->unlockAndPublish();
+
                 return controller_interface::return_type::OK;
             }
 
@@ -177,6 +195,20 @@ namespace riptide_controllers {
                     result->duration.nanosec = total_duration.nanoseconds();
                     goal_handle_->succeed(result);
                     goal_handle_ = nullptr;
+
+                    // Publishing controller state
+                    rt_controller_state_publisher_->lock();
+                    rt_controller_state_publisher_->msg_.header.stamp = time;
+                    rt_controller_state_publisher_->msg_.reference_depth = 0.;
+                    rt_controller_state_publisher_->msg_.feedback_depth = state_interfaces_[0].get_value();
+                    rt_controller_state_publisher_->msg_.error_depth = - state_interfaces_[0].get_value();
+                    rt_controller_state_publisher_->msg_.velocity_output = 0.;
+                    rt_controller_state_publisher_->msg_.output.x = state_interfaces_[1].get_value();
+                    rt_controller_state_publisher_->msg_.output.y = state_interfaces_[2].get_value();
+                    rt_controller_state_publisher_->msg_.output.z = state_interfaces_[3].get_value();
+                    rt_controller_state_publisher_->msg_.output.w = state_interfaces_[4].get_value();
+                    rt_controller_state_publisher_->unlockAndPublish();
+
                     return controller_interface::return_type::OK;
                 }
 
@@ -209,7 +241,20 @@ namespace riptide_controllers {
                     feedback->remaining_time.nanosec = reamining_time.nanoseconds();
 
                     goal_handle_->publish_feedback(feedback);
-                    
+
+                    // Publishing controller state
+                    rt_controller_state_publisher_->lock();
+                    rt_controller_state_publisher_->msg_.header.stamp = time;
+                    rt_controller_state_publisher_->msg_.reference_depth = goal_handle_->get_goal()->depth;
+                    rt_controller_state_publisher_->msg_.feedback_depth = state_interfaces_[0].get_value();
+                    rt_controller_state_publisher_->msg_.error_depth = depth_error;
+                    rt_controller_state_publisher_->msg_.velocity_output = params_.thruster_velocity;
+                    rt_controller_state_publisher_->msg_.output.x = q.x();
+                    rt_controller_state_publisher_->msg_.output.y = q.y();
+                    rt_controller_state_publisher_->msg_.output.z = q.z();
+                    rt_controller_state_publisher_->msg_.output.w = q.w();
+                    rt_controller_state_publisher_->unlockAndPublish();
+
                     return controller_interface::return_type::OK;
                 }
             }
@@ -221,6 +266,20 @@ namespace riptide_controllers {
         command_interfaces_[2].set_value(state_interfaces_[2].get_value());
         command_interfaces_[3].set_value(state_interfaces_[3].get_value());
         command_interfaces_[4].set_value(state_interfaces_[4].get_value());
+
+        // Publishing controller state
+        rt_controller_state_publisher_->lock();
+        rt_controller_state_publisher_->msg_.header.stamp = time;
+        rt_controller_state_publisher_->msg_.reference_depth = 0.;
+        rt_controller_state_publisher_->msg_.feedback_depth = state_interfaces_[0].get_value();
+        rt_controller_state_publisher_->msg_.error_depth = - state_interfaces_[0].get_value();
+        rt_controller_state_publisher_->msg_.velocity_output = 0.;
+        rt_controller_state_publisher_->msg_.output.x = state_interfaces_[1].get_value();
+        rt_controller_state_publisher_->msg_.output.y = state_interfaces_[2].get_value();
+        rt_controller_state_publisher_->msg_.output.z = state_interfaces_[3].get_value();
+        rt_controller_state_publisher_->msg_.output.w = state_interfaces_[4].get_value();
+        rt_controller_state_publisher_->unlockAndPublish();
+
         return controller_interface::return_type::OK;
     }
 

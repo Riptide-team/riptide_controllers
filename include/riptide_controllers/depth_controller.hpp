@@ -4,6 +4,7 @@
 #include <controller_interface/controller_interface.hpp>
 #include "riptide_msgs/action/depth.hpp"
 #include "riptide_msgs/action/immerse.hpp"
+#include "riptide_msgs/msg/depth_controller_state.hpp"
 #include "depth_controller_parameters.hpp"
 
 #include <memory>
@@ -18,6 +19,7 @@ namespace riptide_controllers {
         public:
 
             using Action = riptide_msgs::action::Depth;
+            using ControllerStateType = riptide_msgs::msg::DepthControllerState;
             using GoalHandle = rclcpp_action::ServerGoalHandle<Action>;
 
             DepthController() : controller_interface::ControllerInterface() {};
@@ -62,6 +64,10 @@ namespace riptide_controllers {
             rclcpp_action::CancelResponse handle_cancel(const std::shared_ptr<GoalHandle> goal_handle);
 
             void handle_accepted(const std::shared_ptr<GoalHandle> goal_handle);
+
+            // Controller state publisher
+            rclcpp::Publisher<ControllerStateType>::SharedPtr controller_state_publisher_;
+            std::unique_ptr<realtime_tools::RealtimePublisher<ControllerStateType>> rt_controller_state_publisher_;
 
     };
 

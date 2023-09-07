@@ -150,7 +150,9 @@ namespace riptide_controllers {
 
                 auto result = std::make_shared<Action::Result>();
                 result->depth = state_interfaces_[0].get_value();
-                // result->duration = rclcpp::Duration(goal_handle_->get_goal()->duration->sec, goal_handle_->get_goal()->duration->nanosec);
+                rclcpp::Duration total_duration = time - action_start_time_;
+                result->duration.sec = total_duration.seconds();
+                result->duration.nanosec = total_duration.nanoseconds();
                 goal_handle_->canceled(result);
                 goal_handle_ = nullptr;
                 return controller_interface::return_type::OK;
@@ -170,7 +172,9 @@ namespace riptide_controllers {
 
                     auto result = std::make_shared<Action::Result>();
                     result->depth = state_interfaces_[0].get_value();
-                    result->duration = time - action_start_time_;
+                    rclcpp::Duration total_duration = time - action_start_time_;
+                    result->duration.sec = total_duration.seconds();
+                    result->duration.nanosec = total_duration.nanoseconds();
                     goal_handle_->succeed(result);
                     goal_handle_ = nullptr;
                     return controller_interface::return_type::OK;

@@ -132,8 +132,8 @@ namespace riptide_controllers {
         std::lock_guard<std::mutex> lock_(goal_mutex_);
 
         // TODO find a fix here
-        RCLCPP_INFO(get_node()->get_logger(), "time %d", time.get_clock_type());
-        RCLCPP_INFO(get_node()->get_logger(), "action_start_time_ %d", action_start_time_.get_clock_type());
+        // RCLCPP_INFO(get_node()->get_logger(), "time %d", time.get_clock_type());
+        // RCLCPP_INFO(get_node()->get_logger(), "action_start_time_ %d", action_start_time_.get_clock_type());
         rclcpp::Duration timer = time - action_start_time_;
 
         // Checking if the goal_handle is not nullptr

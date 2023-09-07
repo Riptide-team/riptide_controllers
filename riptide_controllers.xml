@@ -1,25 +1,25 @@
 <library path="riptide_controllers">
-    <class name="riptide_controllers/ImmersionController" type="riptide_controllers::ImmersionController"  base_class_type="controller_interface::ControllerInterface">
+    <class name="riptide_controllers/ImmersionController" type="riptide_controllers::ImmersionController" base_class_type="controller_interface::ControllerInterface">
         <description>
             Riptide full immersion controller
         </description>
     </class>
-    <class name="riptide_controllers/RiptideController" type="riptide_controllers::RiptideController"  base_class_type="controller_interface::ChainableControllerInterface">
+    <class name="riptide_controllers/RiptideController" type="riptide_controllers::RiptideController" base_class_type="controller_interface::ChainableControllerInterface">
         <description>
             Riptide controller in twist
         </description>
     </class>
-    <class name="riptide_controllers/DepthController" type="riptide_controllers::DepthController"  base_class_type="controller_interface::ControllerInterface">
+    <class name="riptide_controllers/DepthController" type="riptide_controllers::DepthController" base_class_type="controller_interface::ControllerInterface">
         <description>
             Riptide simple depth controller which generate a desired rotation matrix depending on the depth error.
         </description>
     </class>
-    <class name="riptide_controllers/LogController" type="riptide_controllers::LogController"  base_class_type="controller_interface::ChainableControllerInterface">
+    <class name="riptide_controllers/LogController" type="riptide_controllers::LogController" base_class_type="controller_interface::ChainableControllerInterface">
         <description>
             Riptide log controller
         </description>
     </class>
-    <class name="riptide_controllers/FullDepthController" type="riptide_controllers::FullDepthController"  base_class_type="controller_interface::ControllerInterface">
+    <class name="riptide_controllers/FullDepthController" type="riptide_controllers::FullDepthController" base_class_type="controller_interface::ControllerInterface">
         <description>
             Riptide full depth controller
         </description>

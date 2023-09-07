@@ -162,10 +162,9 @@ namespace riptide_controllers {
                 goal_handle_->canceled(result);
 
                 // Publishing controller state
-                rclcpp::Duration null_duration = rclcpp::Duration(0, 0);
                 rt_controller_state_publisher_->lock();
                 rt_controller_state_publisher_->msg_.header.stamp = time;
-                rt_controller_state_publisher_->msg_.duration = null_duration;
+                rt_controller_state_publisher_->msg_.duration = rclcpp::Duration(0, 0);
                 rt_controller_state_publisher_->msg_.reference_depth = 0.;
                 rt_controller_state_publisher_->msg_.feedback_depth = state_interfaces_[0].get_value();
                 rt_controller_state_publisher_->msg_.error_depth = - state_interfaces_[0].get_value();
@@ -202,10 +201,9 @@ namespace riptide_controllers {
                     goal_handle_->succeed(result);
 
                     // Publishing controller state
-                    rclcpp::Duration null_duration = rclcpp::Duration(0, 0);
                     rt_controller_state_publisher_->lock();
                     rt_controller_state_publisher_->msg_.header.stamp = time;
-                    rt_controller_state_publisher_->msg_.duration.sec = null_duration;
+                    rt_controller_state_publisher_->msg_.duration = rclcpp::Duration(0, 0);
                     rt_controller_state_publisher_->msg_.reference_depth = 0.;
                     rt_controller_state_publisher_->msg_.feedback_depth = state_interfaces_[0].get_value();
                     rt_controller_state_publisher_->msg_.error_depth = - state_interfaces_[0].get_value();

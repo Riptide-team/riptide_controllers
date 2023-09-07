@@ -191,10 +191,11 @@ namespace riptide_controllers {
                     Eigen::Quaternion<double> q = yawAngle * pitchAngle * rollAngle;
 
                     // Setting command interfaces
-                    command_interfaces_[0].set_value(q.x());
-                    command_interfaces_[1].set_value(q.y());
-                    command_interfaces_[2].set_value(q.z());
-                    command_interfaces_[3].set_value(q.w());
+                    command_interfaces_[0].set_value(params_.thruster_velocity);
+                    command_interfaces_[1].set_value(q.x());
+                    command_interfaces_[2].set_value(q.y());
+                    command_interfaces_[3].set_value(q.z());
+                    command_interfaces_[4].set_value(q.w());
 
                     return controller_interface::return_type::OK;
                 }

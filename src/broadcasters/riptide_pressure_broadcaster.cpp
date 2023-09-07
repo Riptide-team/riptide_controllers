@@ -60,10 +60,19 @@ namespace riptide_broadcasters {
     controller_interface::InterfaceConfiguration PressureBroadcaster::state_interface_configuration() const {
         controller_interface::InterfaceConfiguration state_interfaces_config;
         state_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
-        std::string prefix = std::string(get_node()->get_namespace()).substr(1);
+
+        // Adding prefix if specified
+        std::string prefix;
+        if (params_.prefix.empty()) {
+            prefix = "";
+        }
+        else {
+            prefix = params_.prefix + "_";
+        }
+
         std::vector<std::string> iface = {"pressure", "temperature", "depth", "altitude"};
         for (const auto &i: iface) {
-            state_interfaces_config.names.push_back(prefix + "_" + params_.sensor_name + "/" + i);
+            state_interfaces_config.names.push_back(prefix + params_.sensor_name + "/" + i);
         }
         return state_interfaces_config;
     }

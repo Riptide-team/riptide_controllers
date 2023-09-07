@@ -106,11 +106,20 @@ namespace riptide_broadcasters {
         std::string prefix = std::string(get_node()->get_namespace()).substr(1);
         state_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
 
+        // Adding prefix if specified
+        std::string prefix;
+        if (params_.prefix.empty()) {
+            prefix = "";
+        }
+        else {
+            prefix = params_.prefix + "_";
+        }
+
         // Actuators interfaces
-        state_interfaces_config.names.push_back(prefix + "_" + params_.thruster_joint + "/velocity");
-        state_interfaces_config.names.push_back(prefix + "_" + params_.d_joint + "/position");
-        state_interfaces_config.names.push_back(prefix + "_" + params_.p_joint + "/position");
-        state_interfaces_config.names.push_back(prefix + "_" + params_.s_joint + "/position");
+        state_interfaces_config.names.push_back(prefix + params_.thruster_joint + "/velocity");
+        state_interfaces_config.names.push_back(prefix + params_.d_joint + "/position");
+        state_interfaces_config.names.push_back(prefix + params_.p_joint + "/position");
+        state_interfaces_config.names.push_back(prefix + params_.s_joint + "/position");
 
         // RC interfaces
         for (std::string rc_channel: params_.rc_channels) {

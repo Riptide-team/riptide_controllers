@@ -1,4 +1,10 @@
 riptide_tail_broadcaster:
+  prefix: {
+    type: string,
+    default_value: "",
+    description: "Prefix for interfaces",
+    read_only: true
+  }
   d_joint: {
     type: string,
     description: "Specifies which joints will be used by the controller for the d fin.",

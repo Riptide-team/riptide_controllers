@@ -1,4 +1,10 @@
 pressure_broadcaster:
+  prefix: {
+    type: string,
+    default_value: "",
+    description: "Prefix for interfaces",
+    read_only: true
+  }
   sensor_name: {
     type: string,
     default_value: "",

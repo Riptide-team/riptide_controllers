@@ -243,13 +243,13 @@ namespace riptide_controllers {
                     // Publish feedback
                     auto feedback = std::make_shared<Action::Feedback>();
                     feedback->depth_error = depth_error;
-                    rclcpp::Duration remaining_time = goal_handle_->get_goal()->timeout - timer;
+                    feedback->remaining_time = rclcpp::Duration(goal_handle_->get_goal()->timeout) - timer;
                     goal_handle_->publish_feedback(feedback);
 
                     // Publishing controller state
                     rt_controller_state_publisher_->lock();
                     rt_controller_state_publisher_->msg_.header.stamp = time;
-                    rt_controller_state_publisher_->msg_.duration = remaining_time;
+                    rt_controller_state_publisher_->msg_.duration = rclcpp::Duration(goal_handle_->get_goal()->timeout) - timer;
                     rt_controller_state_publisher_->msg_.reference_depth = goal_handle_->get_goal()->depth;
                     rt_controller_state_publisher_->msg_.feedback_depth = state_interfaces_[0].get_value();
                     rt_controller_state_publisher_->msg_.error_depth = depth_error;

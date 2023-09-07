@@ -203,7 +203,7 @@ namespace riptide_controllers {
 
                     // Publish feedback
                     auto feedback = std::make_shared<Action::Feedback>();
-                    feedback->error = depth_error;
+                    feedback->depth_error = depth_error;
                     rclcpp::Duration reamining_time = action_start_time_ + rclcpp::Duration(goal_handle_->get_goal()->timeout.sec, goal_handle_->get_goal()->timeout.nanosec) - time;
                     feedback->remaining_time.sec = reamining_time.seconds();
                     feedback->remaining_time.nanosec = reamining_time.nanoseconds();

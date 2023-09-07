@@ -140,6 +140,11 @@ namespace riptide_controllers {
         // Current time storage
         current_time_ = time;
 
+        // TODO find a fix here
+        // Computing time since the beginning of the action
+        int nanosecs = 1e9 * (time.seconds() - action_start_time_.nanoseconds()) + time.nanoseconds() - action_start_time_.nanoseconds();
+        rclcpp::Duration timer = rclcpp::Duration(int(nanosecs * 1e-9), int(nanosecs % int(1e9)));
+
         // Checking if the goal_handle is not nullptr
         if (goal_handle_ != nullptr) {
             
@@ -154,9 +159,8 @@ namespace riptide_controllers {
 
                 auto result = std::make_shared<Action::Result>();
                 result->depth = state_interfaces_[0].get_value();
-                rclcpp::Duration total_duration = time - action_start_time_;
-                result->duration.sec = total_duration.seconds();
-                result->duration.nanosec = total_duration.nanoseconds();
+                result->duration.sec = timer.seconds();
+                result->duration.nanosec = timer.nanoseconds();
                 goal_handle_->canceled(result);
 
                 // Publishing controller state
@@ -177,9 +181,11 @@ namespace riptide_controllers {
 
             // If the goal is still executing
             if (goal_handle_->is_executing()) {
+                
+                
 
                 // Check if the timeout is expired -> if so, succeed the goal
-                if (time - action_start_time_ > rclcpp::Duration(goal_handle_->get_goal()->timeout.sec, goal_handle_->get_goal()->timeout.nanosec)) {
+                if (timer > rclcpp::Duration(goal_handle_->get_goal()->timeout.sec, goal_handle_->get_goal()->timeout.nanosec)) {
                     // Setting null velocity and identity orientation
                     command_interfaces_[0].set_value(0);
                     command_interfaces_[1].set_value(state_interfaces_[1].get_value());
@@ -189,9 +195,8 @@ namespace riptide_controllers {
 
                     auto result = std::make_shared<Action::Result>();
                     result->depth = state_interfaces_[0].get_value();
-                    rclcpp::Duration total_duration = time - action_start_time_;
-                    result->duration.sec = total_duration.seconds();
-                    result->duration.nanosec = total_duration.nanoseconds();
+                    result->duration.sec = timer.seconds();
+                    result->duration.nanosec = timer.nanoseconds();
                     goal_handle_->succeed(result);
 
                     // Publishing controller state
@@ -235,12 +240,8 @@ namespace riptide_controllers {
                     auto feedback = std::make_shared<Action::Feedback>();
                     feedback->depth_error = depth_error;
 
-                    // TODO quick fix terminate called after throwing an instance of 'std::runtime_error' what():  can't subtract times with different time sources [1 != 2]
-                    rclcpp::Duration timeout = rclcpp::Duration(goal_handle_->get_goal()->timeout.sec, goal_handle_->get_goal()->timeout.nanosec);
-                    rclcpp::Duration reamining_time = time - action_start_time_;
-
-                    feedback->remaining_time.sec = reamining_time.seconds();
-                    feedback->remaining_time.nanosec = reamining_time.nanoseconds();
+                    feedback->remaining_time.sec = timer.seconds();
+                    feedback->remaining_time.nanosec = timer.nanoseconds();
 
                     goal_handle_->publish_feedback(feedback);
 

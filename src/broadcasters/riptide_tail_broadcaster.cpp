@@ -103,7 +103,6 @@ namespace riptide_broadcasters {
 
     controller_interface::InterfaceConfiguration TailBroadcaster::state_interface_configuration() const {
         controller_interface::InterfaceConfiguration state_interfaces_config;
-        std::string prefix = std::string(get_node()->get_namespace()).substr(1);
         state_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
 
         // Adding prefix if specified
@@ -123,12 +122,12 @@ namespace riptide_broadcasters {
 
         // RC interfaces
         for (std::string rc_channel: params_.rc_channels) {
-            state_interfaces_config.names.push_back(prefix + "_" + params_.rc_name + "/" + rc_channel);
+            state_interfaces_config.names.push_back(prefix + params_.rc_name + "/" + rc_channel);
         }
 
         // Multiplexer interfaces
-        state_interfaces_config.names.push_back(prefix + "_" + params_.multiplexer_name + "/automatic");
-        state_interfaces_config.names.push_back(prefix + "_" + params_.multiplexer_name + "/remaining_time");
+        state_interfaces_config.names.push_back(prefix + params_.multiplexer_name + "/automatic");
+        state_interfaces_config.names.push_back(prefix + params_.multiplexer_name + "/remaining_time");
 
         return state_interfaces_config;
     }

@@ -177,8 +177,6 @@ namespace riptide_controllers {
 
             // If the goal is still executing
             if (goal_handle_->is_executing()) {
-                
-                
 
                 // Check if the timeout is expired -> if so, succeed the goal
                 if (timer > rclcpp::Duration(goal_handle_->get_goal()->timeout.sec, goal_handle_->get_goal()->timeout.nanosec)) {

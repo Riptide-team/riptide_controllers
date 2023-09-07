@@ -2,7 +2,8 @@ depth_controller:
   prefix: {
     type: string,
     description: "Specifies the prefix of the controller",
-    read_only: true
+    read_only: true,
+    default_value: ""
   }
   pressure_name: {
     type: string,

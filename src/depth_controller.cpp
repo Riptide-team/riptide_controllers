@@ -237,9 +237,9 @@ namespace riptide_controllers {
 
                     // TODO quick fix terminate called after throwing an instance of 'std::runtime_error' what():  can't subtract times with different time sources [1 != 2]
                     rclcpp::Duration timeout = rclcpp::Duration(goal_handle_->get_goal()->timeout.sec, goal_handle_->get_goal()->timeout.nanosec);
-                    rclcpp::Duration reamining_time = action_start_time_ - time;
+                    rclcpp::Duration reamining_time = time - action_start_time_;
 
-                    feedback->remaining_time.sec = reamining_time.seconds() + timeout.seconds();
+                    feedback->remaining_time.sec = reamining_time.seconds();
                     feedback->remaining_time.nanosec = reamining_time.nanoseconds();
 
                     goal_handle_->publish_feedback(feedback);

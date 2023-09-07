@@ -127,10 +127,6 @@ namespace riptide_controllers {
         command_interfaces_[1].set_value(std::numeric_limits<double>::quiet_NaN());
         command_interfaces_[2].set_value(std::numeric_limits<double>::quiet_NaN());
 
-        // Resetting goal handle
-        std::scoped_lock<std::mutex> lock_(goal_mutex_);
-        goal_handle_ = nullptr;
-
         return CallbackReturn::SUCCESS;
     }
 
@@ -308,9 +304,6 @@ namespace riptide_controllers {
 
     rclcpp_action::CancelResponse DepthController::handle_cancel(const std::shared_ptr<GoalHandle> goal_handle) {
         RCLCPP_INFO(get_node()->get_logger(), "Received request to cancel goal");
-
-        // Resetting goal_handle
-        goal_handle_ = nullptr;
 
         (void)goal_handle;
         return rclcpp_action::CancelResponse::ACCEPT;

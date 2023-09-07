@@ -201,6 +201,12 @@ namespace riptide_controllers {
                     command_interfaces_[3].set_value(q.z());
                     command_interfaces_[4].set_value(q.w());
 
+                    // Publish feedback
+                    auto feedback = std::make_shared<Action::Feedback>();
+                    feedback->error = depth_error;
+                    rclcpp::Duration reamining_time = action_start_time_ + rclcpp::Duration(goal_handle_->get_goal()->timeout.sec, goal_handle_->get_goal()->timeout.nanosec) - time;
+                    feedback->remaining_time.sec = reamining_time.seconds();
+                    feedback->remaining_time.nanosec = reamining_time.nanoseconds();
                     return controller_interface::return_type::OK;
                 }
             }

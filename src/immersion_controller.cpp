@@ -63,7 +63,7 @@ namespace riptide_controllers {
         // Init Depth action
         action_server_ = rclcpp_action::create_server<Action>(
             get_node(),
-            "immerse",
+            "~/immerse",
             std::bind(&ImmersionController::handle_goal, this, std::placeholders::_1, std::placeholders::_2),
             std::bind(&ImmersionController::handle_cancel, this, std::placeholders::_1),
             std::bind(&ImmersionController::handle_accepted, this, std::placeholders::_1)
@@ -168,15 +168,15 @@ namespace riptide_controllers {
                     // Going upwards
                     command_interfaces_[0].set_value(params_.thruster_velocity);
                     command_interfaces_[1].set_value(0.);
-                    command_interfaces_[2].set_value(-params_.fin_angle);
-                    command_interfaces_[3].set_value(params_.fin_angle);
+                    command_interfaces_[2].set_value(params_.fin_angle);
+                    command_interfaces_[3].set_value(-params_.fin_angle);
                 }
                 else {
                     // Going downwards
                     command_interfaces_[0].set_value(params_.thruster_velocity);
                     command_interfaces_[1].set_value(0.);
-                    command_interfaces_[2].set_value(params_.fin_angle);
-                    command_interfaces_[3].set_value(-params_.fin_angle);
+                    command_interfaces_[2].set_value(-params_.fin_angle);
+                    command_interfaces_[3].set_value(params_.fin_angle);
                 }
 
                 // Publish feedback

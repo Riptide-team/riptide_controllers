@@ -158,7 +158,6 @@ namespace riptide_controllers {
                 result->duration.sec = total_duration.seconds();
                 result->duration.nanosec = total_duration.nanoseconds();
                 goal_handle_->canceled(result);
-                goal_handle_ = nullptr;
 
                 // Publishing controller state
                 rt_controller_state_publisher_->lock();
@@ -194,7 +193,6 @@ namespace riptide_controllers {
                     result->duration.sec = total_duration.seconds();
                     result->duration.nanosec = total_duration.nanoseconds();
                     goal_handle_->succeed(result);
-                    goal_handle_ = nullptr;
 
                     // Publishing controller state
                     rt_controller_state_publisher_->lock();

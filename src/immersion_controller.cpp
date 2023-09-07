@@ -153,6 +153,7 @@ namespace riptide_controllers {
                 if (time > immersion_start_time_ + *phase_1_duration_ + *phase_2_duration_) {
                     // Publishing result
                     auto result = std::make_shared<Action::Result>();
+                    result->final_duration = (time - immersion_start_time_).seconds();
                     goal_handle_->succeed(result);
 
                      // Publishing null commands
@@ -181,7 +182,7 @@ namespace riptide_controllers {
 
                 // Publish feedback
                 auto feedback = std::make_shared<Action::Feedback>();
-                feedback->remaining_time = std::max(0., (*phase_1_duration_ + *phase_2_duration_ + time - immersion_start_time_).seconds());
+                feedback->remaining_time = std::max(0., (*phase_1_duration_ + *phase_2_duration_ + immersion_start_time_ - time).seconds());
                 goal_handle_->publish_feedback(feedback);
                 return controller_interface::return_type::OK;
             }

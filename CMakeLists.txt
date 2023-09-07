@@ -12,6 +12,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     pluginlib
     rclcpp
     rclcpp_lifecycle
+    lifecycle_msgs
     rclcpp_action
     realtime_tools
     tf2

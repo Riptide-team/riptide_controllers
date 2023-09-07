@@ -4,7 +4,7 @@
 
 
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
-#include "rclcpp_lifecycle/state.hpp"
+#include "lifecycle_msgs/msg/state.hpp"
 #include "rclcpp/qos.hpp"
 #include "rclcpp/duration.hpp"
 
@@ -197,7 +197,11 @@ namespace riptide_controllers {
     }
 
     rclcpp_action::GoalResponse ImmersionController::handle_goal(const rclcpp_action::GoalUUID & uuid, std::shared_ptr<const Action::Goal> /*goal*/) {
-        // Handle goal
+        // Reject goal if the controller is not active
+        if (get_node()->get_current_state().id() != lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) {
+            return rclcpp_action::GoalResponse::REJECT;
+        }
+        
         (void)uuid;
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
     }

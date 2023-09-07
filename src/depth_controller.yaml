@@ -40,3 +40,9 @@ depth_controller:
     default_value: 0.,
     description: "Specifies the desired yaw angle",
   }
+  thruster_velocity : {
+    type: double,
+    default_value: 0.5,
+    description: "Specifies the desired truster velocity",
+    read_only: true
+  }

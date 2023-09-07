@@ -311,7 +311,11 @@ namespace riptide_controllers {
         // Saving goal handle
         std::lock_guard<std::mutex> lock_(goal_mutex_);
         goal_handle_ = goal_handle;
-        action_start_time_ = get_node()->get_clock()->now();
+        rclcpp::Time current_time = get_node()->get_clock()->now();
+        RCLCPP_INFO(get_node()->get_logger(), "Current time clock type %d", current_time.get_clock_type());
+
+        action_start_time_ = rclcpp::Time(current_time, rclcpp::ClockType::ROS_TIME);
+        RCLCPP_INFO(get_node()->get_logger(), "action_start_time_ clock type %d", action_start_time_.get_clock_type());
     }
 
 } // riptide_controllers

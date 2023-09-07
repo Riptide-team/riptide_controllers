@@ -1,12 +1,13 @@
 #pragma once
 
-#include "controller_interface/controller_interface.hpp"
+#include "controller_interface/chainable_controller_interface.hpp"
 #include "log_controller_parameters.hpp"
 #include <string>
 
 #include "realtime_tools/realtime_buffer.h"
 #include "realtime_tools/realtime_publisher.h"
 #include "geometry_msgs/msg/quaternion.hpp"
+#include "geometry_msgs/msg/twist.hpp"
 #include "riptide_msgs/msg/log_controller_state.hpp"
 
 #include <eigen3/Eigen/Dense>
@@ -20,11 +21,12 @@ namespace riptide_controllers {
         return (Eigen::Vector<typename Derived::Scalar, 3>() << mat(2, 1), mat(0, 2), mat(1, 0)).finished();
     }
 
-    class LogController : public controller_interface::ControllerInterface {
+    class LogController : public controller_interface::ChainableControllerInterface {
         public:
 
             using ControllerStateType = riptide_msgs::msg::LogControllerState;
             using CmdType = geometry_msgs::msg::Quaternion;
+            using CmdVelType = geometry_msgs::msg::Twist;
 
             LogController();
 
@@ -40,22 +42,27 @@ namespace riptide_controllers {
 
             controller_interface::CallbackReturn on_deactivate(const rclcpp_lifecycle::State & previous_state) override;
 
-            controller_interface::return_type update(const rclcpp::Time & time, const rclcpp::Duration & period) override;
+            // Chained controller specific methods
+            controller_interface::return_type update_and_write_commands(const rclcpp::Time & time, const rclcpp::Duration & period) override;
+
+            std::vector<hardware_interface::CommandInterface> on_export_reference_interfaces() override;
+
+            bool on_set_chained_mode(bool chained_mode) override;
+
+            controller_interface::return_type update_reference_from_subscribers() override;
 
         private:
 
             std::shared_ptr<log_controller::ParamListener> param_listener_;
             log_controller::Params params_;
 
-            // Wanted orientation
-            Eigen::Quaterniond qw_;
-
-            // Current orientation
-            Eigen::Quaterniond q_;
-
             // Desired orientation subscriber
             realtime_tools::RealtimeBuffer<std::shared_ptr<CmdType>> rt_command_ptr_;
             rclcpp::Subscription<CmdType>::SharedPtr quaternion_command_subscriber_;
+
+            // Desired orientation subscriber
+            realtime_tools::RealtimeBuffer<std::shared_ptr<CmdVelType>> rt_vel_command_ptr_;
+            rclcpp::Subscription<CmdVelType>::SharedPtr vel_command_subscriber_;
 
             // Controller state publisher
             rclcpp::Publisher<ControllerStateType>::SharedPtr controller_state_publisher_;

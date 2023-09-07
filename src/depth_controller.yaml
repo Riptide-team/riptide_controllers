@@ -1,17 +1,7 @@
 depth_controller:
-  p_joint: {
+  prefix: {
     type: string,
-    description: "Specifies which joints will be used by the controller for the p fin.",
-    read_only: true
-  }
-  s_joint: {
-    type: string,
-    description: "Specifies which joints will be used by the controller for the s fin.",
-    read_only: true
-  }
-  thruster_joint: {
-    type: string,
-    description: "Specifies which joints will be used by the controller for the thruster.",
+    description: "Specifies the prefix of the controller",
     read_only: true
   }
   pressure_name: {
@@ -21,36 +11,31 @@ depth_controller:
   }
   imu_name: {
     type: string,
-    description: "Specifies the pressure sensor name which will be claimed by the controller",
+    description: "Specifies the imu name which will be claimed by the controller",
     read_only: true
   }
-  thruster_velocity: {
-    type: double,
-    default_value: 0.1,
-    description: "Specifies the command applied to the thruster",
+  orientation_reference_joint : {
+    type: string,
+    description: "Specifies the joint name which will be used as reference for the orientation",
     read_only: true
   }
-  K_inf: {
+  K: {
     type: double,
     default_value: 0.52,
-    description: "Specifies the infinite command to the fins",
-    read_only: true
+    description: "Specifies the max pitch when the depth error is infinite",
   }
   r: {
     type: double,
     default_value: 1.,
-    description: "Specifies the regulation corridor",
-    read_only: true
+    description: "Specifies the regulation corridor for acceptable depth error",
   }
-  K_fin: {
+  roll : {
     type: double,
-    default_value: 1.,
-    description: "Specifies the proportional infinite factor for the fin regulation",
-    read_only: true
+    default_value: 0.,
+    description: "Specifies the desired roll angle",
   }
-  Range_fin: {
+  yaw : {
     type: double,
-    default_value: 1.,
-    description: "Specifies the fin regulation corridor",
-    read_only: true
+    default_value: 0.,
+    description: "Specifies the desired yaw angle",
   }

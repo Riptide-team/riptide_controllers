@@ -20,9 +20,6 @@ namespace riptide_controllers {
             using Action = riptide_msgs::action::Depth;
             using GoalHandle = rclcpp_action::ServerGoalHandle<Action>;
 
-            using ImmerseAction = riptide_msgs::action::Immersea;
-            using ImmerseGoalHandle = rclcpp_action::ServerGoalHandle<ImmerseAction>;
-
             DepthController() : controller_interface::ControllerInterface() {};
 
             controller_interface::InterfaceConfiguration command_interface_configuration() const override;
@@ -45,33 +42,17 @@ namespace riptide_controllers {
             std::shared_ptr<depth_controller::ParamListener> param_listener_;
             depth_controller::Params params_;
 
-            std::string mode_ = "IDLE";
+            // Current time
+            rclcpp::Time current_time_;
 
-            // Depth control
-            double alpha;
-            double K_inf_;
-            double K_fin_;
-            double r_fin_;
-            double r_;
+            // Starting time
+            rclcpp::Time action_start_time_;
 
-            std::mutex depth_mutex_;
+            // Depth mutex
+            std::mutex goal_mutex_;
 
-            double duration_;
-            double requested_depth_;
-
-            double current_depth_;
-            // Eigen::Vector3d euler_angles_; // yaw = euler[0]; pitch = euler[1]; roll = euler[2]
-            double pitch_;
-
-            double depth_error_;
-
-            double starting_time_;
-            double reaching_time_;
-            bool reached_flag_;
-
-            // bool running_;
-
-
+            // Goal handle
+            std::shared_ptr<GoalHandle> goal_handle_;
 
             // Action server
             rclcpp_action::Server<riptide_msgs::action::Depth>::SharedPtr action_server_;
@@ -82,37 +63,6 @@ namespace riptide_controllers {
 
             void handle_accepted(const std::shared_ptr<GoalHandle> goal_handle);
 
-            void execute(const std::shared_ptr<GoalHandle> goal_handle);
-
-            // Action handle
-            std::shared_ptr<Action::Feedback> feedback_;
-            std::shared_ptr<Action::Result> result_;
-
-
-
-            // Immerse Action server
-            rclcpp_action::Server<riptide_msgs::action::Immerse>::SharedPtr immerse_action_server_;
-
-            rclcpp_action::GoalResponse immerse_handle_goal(const rclcpp_action::GoalUUID & uuid, std::shared_ptr<const ImmerseAction::Goal> goal);
-
-            rclcpp_action::CancelResponse immerse_handle_cancel(const std::shared_ptr<ImmerseGoalHandle> goal_handle);
-
-            void immerse_handle_accepted(const std::shared_ptr<ImmerseGoalHandle> goal_handle);
-
-            void immerse_execute(const std::shared_ptr<ImmerseGoalHandle> goal_handle);
-
-            // Immerse Action handle
-            std::shared_ptr<ImmerseAction::Feedback> immerse_feedback_;
-            std::shared_ptr<ImmerseAction::Result> immerse_result_;
-
-            // Mutex for immersion
-            std::mutex immerse_mutex_;
-
-            // Immersion data
-            double requested_duration_;
-            // double requested_depth_;
-            double requested_velocity_;
-            double requested_pitch_;
     };
 
 } // riptide_controllers

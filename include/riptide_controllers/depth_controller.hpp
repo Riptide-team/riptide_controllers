@@ -23,7 +23,7 @@ namespace riptide_controllers {
             using ControllerStateType = riptide_msgs::msg::DepthControllerState;
             using GoalHandle = rclcpp_action::ServerGoalHandle<Action>;
 
-            DepthController() : controller_interface::ControllerInterface() {};
+            DepthController() : controller_interface::ControllerInterface(), action_start_time_(0, 0, rcl_clock_type_t::RCL_ROS_TIME) {};
 
             controller_interface::InterfaceConfiguration command_interface_configuration() const override;
 

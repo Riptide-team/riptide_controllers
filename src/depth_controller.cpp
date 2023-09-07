@@ -150,6 +150,9 @@ namespace riptide_controllers {
             
             // Checking if goal is cancelling
             if (goal_handle_->is_canceling()) {
+
+                RCLCPP_INFO(get_node()->get_logger(), "Action canceled");
+
                 // Setting null velocity and identity orientation
                 command_interfaces_[0].set_value(0);
                 command_interfaces_[1].set_value(state_interfaces_[1].get_value());
@@ -186,6 +189,9 @@ namespace riptide_controllers {
 
                 // Check if the timeout is expired -> if so, succeed the goal
                 if (timer > rclcpp::Duration(goal_handle_->get_goal()->timeout.sec, goal_handle_->get_goal()->timeout.nanosec)) {
+
+                    RCLCPP_INFO(get_node()->get_logger(), "Action finished");
+
                     // Setting null velocity and identity orientation
                     command_interfaces_[0].set_value(0);
                     command_interfaces_[1].set_value(state_interfaces_[1].get_value());
@@ -218,6 +224,8 @@ namespace riptide_controllers {
                 }
 
                 else {
+                    RCLCPP_INFO(get_node()->get_logger(), "Action not finished");
+
                     // Computing depth error (positive value is go downwards, positive value is go upwards)
                     double depth_error = goal_handle_->get_goal()->depth - state_interfaces_[0].get_value();
 
@@ -268,6 +276,8 @@ namespace riptide_controllers {
                 }
             }
         }
+
+        RCLCPP_INFO(get_node()->get_logger(), "goal_handle is nullptr");
 
         // Setting null velocity and identity orientation
         command_interfaces_[0].set_value(0);

@@ -221,7 +221,7 @@ namespace riptide_controllers {
         }
 
         // Checking duration > 0
-        if (static_cast<double>(goal->timeout.sec + 1e9 * goal->timeout.nanosec) < 0.) {
+        if (static_cast<double>(goal->timeout.sec) + 1e-9 * static_cast<double>(goal->timeout.nanosec) < 0.) {
             RCLCPP_ERROR(get_node()->get_logger(), "Requested duration must be positive");
             return rclcpp_action::GoalResponse::REJECT;
         }

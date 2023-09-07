@@ -103,7 +103,6 @@ namespace riptide_broadcasters {
 
     controller_interface::InterfaceConfiguration TailBroadcaster::state_interface_configuration() const {
         controller_interface::InterfaceConfiguration state_interfaces_config;
-        std::string prefix = std::string(get_node()->get_namespace()).substr(1);
         state_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
 
         // Adding prefix if specified

@@ -134,17 +134,12 @@ namespace riptide_controllers {
         std::lock_guard<std::mutex> lock_(goal_mutex_);
 
         // Current time storage
-        current_time_ = time;
-
         RCLCPP_INFO(get_node()->get_logger(), "get_node clock type: %d", get_node()->get_clock()->get_clock_type());
         RCLCPP_INFO(get_node()->get_logger(), "Time clock type: %d", time.get_clock_type());
-        RCLCPP_INFO(get_node()->get_logger(), "current_time clock type: %d", current_time_.get_clock_type());
         RCLCPP_INFO(get_node()->get_logger(), "action_start_time clock type: %d", action_start_time_.get_clock_type());
 
         // TODO find a fix here
-        // Computing time since the beginning of the action
-        int nanosecs = 1e9 * (time.seconds() - action_start_time_.nanoseconds()) + time.nanoseconds() - action_start_time_.nanoseconds();
-        rclcpp::Duration timer = rclcpp::Duration(int(nanosecs * 1e-9), int(nanosecs % int(1e9)));
+        rclcpp::Duration timer = time - action_start_time_;
 
         // Checking if the goal_handle is not nullptr
         if (goal_handle_ != nullptr) {
@@ -163,15 +158,13 @@ namespace riptide_controllers {
 
                 auto result = std::make_shared<Action::Result>();
                 result->depth = state_interfaces_[0].get_value();
-                result->duration.sec = timer.seconds();
-                result->duration.nanosec = timer.nanoseconds();
+                result->duration = timer;
                 goal_handle_->canceled(result);
 
                 // Publishing controller state
                 rt_controller_state_publisher_->lock();
                 rt_controller_state_publisher_->msg_.header.stamp = time;
-                rt_controller_state_publisher_->msg_.duration.sec = timer.seconds();
-                rt_controller_state_publisher_->msg_.duration.nanosec = timer.nanoseconds();
+                rt_controller_state_publisher_->msg_.duration = rclcpp::Duration(0, 0);
                 rt_controller_state_publisher_->msg_.reference_depth = 0.;
                 rt_controller_state_publisher_->msg_.feedback_depth = state_interfaces_[0].get_value();
                 rt_controller_state_publisher_->msg_.error_depth = - state_interfaces_[0].get_value();
@@ -191,7 +184,7 @@ namespace riptide_controllers {
                 RCLCPP_INFO(get_node()->get_logger(), "timer value sec=%f, ", timer.seconds());
 
                 // Check if the timeout is expired -> if so, succeed the goal
-                if (timer > rclcpp::Duration(goal_handle_->get_goal()->timeout.sec, goal_handle_->get_goal()->timeout.nanosec)) {
+                if (timer > goal_handle_->get_goal()->timeout) {
 
                     RCLCPP_INFO(get_node()->get_logger(), "Action finished");
 
@@ -204,15 +197,13 @@ namespace riptide_controllers {
 
                     auto result = std::make_shared<Action::Result>();
                     result->depth = state_interfaces_[0].get_value();
-                    result->duration.sec = timer.seconds();
-                    result->duration.nanosec = timer.nanoseconds();
+                    result->duration = timer;
                     goal_handle_->succeed(result);
 
                     // Publishing controller state
                     rt_controller_state_publisher_->lock();
                     rt_controller_state_publisher_->msg_.header.stamp = time;
-                    rt_controller_state_publisher_->msg_.duration.sec = timer.seconds();
-                    rt_controller_state_publisher_->msg_.duration.nanosec = timer.nanoseconds();
+                    rt_controller_state_publisher_->msg_.duration.sec = rclcpp::Duration(0, 0);
                     rt_controller_state_publisher_->msg_.reference_depth = 0.;
                     rt_controller_state_publisher_->msg_.feedback_depth = state_interfaces_[0].get_value();
                     rt_controller_state_publisher_->msg_.error_depth = - state_interfaces_[0].get_value();
@@ -252,19 +243,13 @@ namespace riptide_controllers {
                     // Publish feedback
                     auto feedback = std::make_shared<Action::Feedback>();
                     feedback->depth_error = depth_error;
-
-                    rclcpp::Duration remaining_time = rclcpp::Duration(goal_handle_->get_goal()->timeout.sec, goal_handle_->get_goal()->timeout.nanosec) - timer;
-
-                    feedback->remaining_time.sec = remaining_time.seconds();
-                    feedback->remaining_time.nanosec = remaining_time.nanoseconds();
-
+                    remaining_time = goal_handle_->get_goal()->timeout - timer;
                     goal_handle_->publish_feedback(feedback);
 
                     // Publishing controller state
                     rt_controller_state_publisher_->lock();
                     rt_controller_state_publisher_->msg_.header.stamp = time;
-                    rt_controller_state_publisher_->msg_.duration.sec = remaining_time.seconds();
-                    rt_controller_state_publisher_->msg_.duration.nanosec = remaining_time.nanoseconds();
+                    rt_controller_state_publisher_->msg_.duration = remaining_time;
                     rt_controller_state_publisher_->msg_.reference_depth = goal_handle_->get_goal()->depth;
                     rt_controller_state_publisher_->msg_.feedback_depth = state_interfaces_[0].get_value();
                     rt_controller_state_publisher_->msg_.error_depth = depth_error;
@@ -292,6 +277,7 @@ namespace riptide_controllers {
         // Publishing controller state
         rt_controller_state_publisher_->lock();
         rt_controller_state_publisher_->msg_.header.stamp = time;
+        rt_controller_state_publisher_->msg_.duration = rclcpp::Duration(0, 0);
         rt_controller_state_publisher_->msg_.reference_depth = 0.;
         rt_controller_state_publisher_->msg_.feedback_depth = state_interfaces_[0].get_value();
         rt_controller_state_publisher_->msg_.error_depth = - state_interfaces_[0].get_value();
@@ -338,7 +324,7 @@ namespace riptide_controllers {
         // Saving goal handle
         std::lock_guard<std::mutex> lock_(goal_mutex_);
         goal_handle_ = goal_handle;
-        action_start_time_ = current_time_;
+        action_start_time_ = get_node()->get_clock()->now();
     }
 
 } // riptide_controllers

@@ -45,9 +45,6 @@ namespace riptide_controllers {
             std::shared_ptr<depth_controller::ParamListener> param_listener_;
             depth_controller::Params params_;
 
-            // Current time
-            rclcpp::Time current_time_;
-
             // Starting time
             rclcpp::Time action_start_time_;
 

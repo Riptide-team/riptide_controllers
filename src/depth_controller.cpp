@@ -216,8 +216,8 @@ namespace riptide_controllers {
                     // Computing depth error (positive value is go downwards, positive value is go upwards)
                     double depth_error = goal_handle_->get_goal()->depth - state_interfaces_[0].get_value();
 
-                    // Computing wanted pitch
-                    double wanted_pitch = params_.K * std::atan(depth_error / params_.r);
+                    // Computing wanted pitch (- comes from orientation convention, positive error -> going down, negative error -> going up)
+                    double wanted_pitch = - params_.K * std::atan(depth_error / params_.r);
 
                     // Building wanted command orientation from euler angles
                     Eigen::AngleAxisd yawAngle(params_.yaw, Eigen::Vector3d::UnitZ());

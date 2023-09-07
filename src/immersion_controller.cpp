@@ -50,11 +50,11 @@ namespace riptide_controllers {
         }
 
         // Init phase_1_duration
-        RCLCPP_DEBUG(get_node()->get_logger(), "Phase 1 duration: %f", params_.phase_1_duration);
+        RCLCPP_INFO(get_node()->get_logger(), "Phase 1 duration: %f", params_.phase_1_duration);
         phase_1_duration_ = std::make_unique<rclcpp::Duration>(std::chrono::nanoseconds(static_cast<std::int64_t>(params_.phase_1_duration * 1e9)));
 
         // Init phase_2_duration
-        RCLCPP_DEBUG(get_node()->get_logger(), "Phase 2 duration: %f", params_.phase_2_duration);
+        RCLCPP_INFO(get_node()->get_logger(), "Phase 2 duration: %f", params_.phase_2_duration);
         phase_2_duration_ = std::make_unique<rclcpp::Duration>(std::chrono::nanoseconds(static_cast<std::int64_t>(params_.phase_2_duration * 1e9)));
 
         // Init goal handle
@@ -153,6 +153,7 @@ namespace riptide_controllers {
                 if (time > immersion_start_time_ + *phase_1_duration_ + *phase_2_duration_) {
                     // Publishing result
                     auto result = std::make_shared<Action::Result>();
+                    result->final_duration = (time - immersion_start_time_).seconds();
                     goal_handle_->succeed(result);
 
                      // Publishing null commands
@@ -181,7 +182,7 @@ namespace riptide_controllers {
 
                 // Publish feedback
                 auto feedback = std::make_shared<Action::Feedback>();
-                feedback->remaining_time = std::max(0., (*phase_1_duration_ + *phase_2_duration_ + time - immersion_start_time_).seconds());
+                feedback->remaining_time = std::max(0., (*phase_1_duration_ + *phase_2_duration_ + immersion_start_time_ - time).seconds());
                 goal_handle_->publish_feedback(feedback);
                 return controller_interface::return_type::OK;
             }

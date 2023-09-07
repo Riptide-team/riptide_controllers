@@ -207,6 +207,9 @@ namespace riptide_controllers {
                     rclcpp::Duration reamining_time = action_start_time_ + rclcpp::Duration(goal_handle_->get_goal()->timeout.sec, goal_handle_->get_goal()->timeout.nanosec) - time;
                     feedback->remaining_time.sec = reamining_time.seconds();
                     feedback->remaining_time.nanosec = reamining_time.nanoseconds();
+
+                    goal_handle_->publish_feedback(feedback);
+                    
                     return controller_interface::return_type::OK;
                 }
             }

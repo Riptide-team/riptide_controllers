@@ -136,6 +136,10 @@ namespace riptide_controllers {
         // Current time storage
         current_time_ = time;
 
+        RCLCPP_INFO(get_node()->get_logger(), "Time clock type: %d", time.get_clock_type());
+        RCLCPP_INFO(get_node()->get_logger(), "current_time clock type: %d", current_time.get_clock_type());
+        RCLCPP_INFO(get_node()->get_logger(), "action_start_time clock type: %d", action_start_time.get_clock_type());
+
         // TODO find a fix here
         // Computing time since the beginning of the action
         int nanosecs = 1e9 * (time.seconds() - action_start_time_.nanoseconds()) + time.nanoseconds() - action_start_time_.nanoseconds();

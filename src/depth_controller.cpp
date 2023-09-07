@@ -137,7 +137,7 @@ namespace riptide_controllers {
         current_time_ = time;
 
         // Checking if the goal_handle is not nullptr
-        if (goal_handle_ == nullptr) {
+        if (goal_handle_ != nullptr) {
             
             // Checking if goal is cancelling
             if (goal_handle_->is_canceling()) {

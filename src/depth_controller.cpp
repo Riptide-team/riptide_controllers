@@ -198,6 +198,8 @@ namespace riptide_controllers {
                     // Publishing controller state
                     rt_controller_state_publisher_->lock();
                     rt_controller_state_publisher_->msg_.header.stamp = time;
+                    rt_controller_state_publisher_->msg_.duration.sec = timer.seconds();
+                    rt_controller_state_publisher_->msg_.duration.nanosec = timer.nanoseconds();
                     rt_controller_state_publisher_->msg_.reference_depth = 0.;
                     rt_controller_state_publisher_->msg_.feedback_depth = state_interfaces_[0].get_value();
                     rt_controller_state_publisher_->msg_.error_depth = - state_interfaces_[0].get_value();

@@ -6,6 +6,7 @@
 #include "riptide_msgs/action/immerse.hpp"
 #include "riptide_msgs/msg/depth_controller_state.hpp"
 #include "depth_controller_parameters.hpp"
+#include "realtime_tools/realtime_publisher.h"
 
 #include <memory>
 #include <mutex>

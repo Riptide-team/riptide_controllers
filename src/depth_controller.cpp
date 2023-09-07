@@ -7,6 +7,8 @@
 
 #include <riptide_msgs/action/depth.hpp>
 
+#include "rcl/time.h"
+
 #include <cmath>
 #include <eigen3/Eigen/Dense>
 #include <functional>
@@ -314,7 +316,7 @@ namespace riptide_controllers {
         rclcpp::Time current_time = get_node()->get_clock()->now();
         RCLCPP_INFO(get_node()->get_logger(), "Current time clock type %d", current_time.get_clock_type());
 
-        action_start_time_ = rclcpp::Time(current_time, rclcpp::ClockType::ROS_TIME);
+        action_start_time_ = rclcpp::Time(current_time, rcl_clock_type_t::RCL_ROS_TIME);
         RCLCPP_INFO(get_node()->get_logger(), "action_start_time_ clock type %d", action_start_time_.get_clock_type());
     }
 

@@ -113,10 +113,6 @@ namespace riptide_controllers {
         command_interfaces_[1].set_value(0);
         command_interfaces_[2].set_value(0);
 
-        // Resetting goal handle
-        std::scoped_lock<std::mutex> lock_(goal_mutex_);
-        goal_handle_ = nullptr;
-
         return CallbackReturn::SUCCESS;
     }
 
@@ -132,11 +128,6 @@ namespace riptide_controllers {
 
     controller_interface::return_type DepthController::update(const rclcpp::Time & time, const rclcpp::Duration & /*period*/) {
         std::lock_guard<std::mutex> lock_(goal_mutex_);
-
-        // Current time storage
-        RCLCPP_INFO(get_node()->get_logger(), "get_node clock type: %d", get_node()->get_clock()->get_clock_type());
-        RCLCPP_INFO(get_node()->get_logger(), "Time clock type: %d", time.get_clock_type());
-        RCLCPP_INFO(get_node()->get_logger(), "action_start_time clock type: %d", action_start_time_.get_clock_type());
 
         // TODO find a fix here
         rclcpp::Duration timer = time - action_start_time_;
@@ -181,8 +172,6 @@ namespace riptide_controllers {
             // If the goal is still executing
             if (goal_handle_->is_executing()) {
 
-                RCLCPP_INFO(get_node()->get_logger(), "timer value sec=%f, ", timer.seconds());
-
                 // Check if the timeout is expired -> if so, succeed the goal
                 if (timer > goal_handle_->get_goal()->timeout) {
 
@@ -218,8 +207,6 @@ namespace riptide_controllers {
                 }
 
                 else {
-                    RCLCPP_INFO(get_node()->get_logger(), "Action not finished");
-
                     // Computing depth error (positive value is go downwards, positive value is go upwards)
                     double depth_error = goal_handle_->get_goal()->depth - state_interfaces_[0].get_value();
 
@@ -264,8 +251,6 @@ namespace riptide_controllers {
                 }
             }
         }
-
-        RCLCPP_INFO(get_node()->get_logger(), "goal_handle is nullptr");
 
         // Setting null velocity and identity orientation
         command_interfaces_[0].set_value(0);

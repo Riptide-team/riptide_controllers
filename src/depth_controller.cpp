@@ -226,7 +226,7 @@ namespace riptide_controllers {
             return rclcpp_action::GoalResponse::REJECT;
         }
 
-        RCLCPP_INFO(get_node()->get_logger(), "Requested action: depth=%fm, duration=%fs", goal->depth, static_cast<double>(goal->timeout.sec + 1e9 * goal->timeout.nanosec));
+        RCLCPP_INFO(get_node()->get_logger(), "Requested action: depth=%fm, duration=%fs", goal->depth, static_cast<double>(goal->timeout.sec) + 1e-9 * static_cast<double>(goal->timeout.nanosec));
         (void)uuid;
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
     }

@@ -206,9 +206,9 @@ namespace riptide_controllers {
         // }
 
         // Getting the twist command
-        wc_(0) = reference_interfaces_[1];
-        wc_(1) = reference_interfaces_[2];
-        wc_(2) = reference_interfaces_[3];
+        wc_(0) = -reference_interfaces_[1];
+        wc_(1) = -reference_interfaces_[2];
+        wc_(2) = -reference_interfaces_[3];
 
         // Getting actual twist
         Eigen::Vector3d wm_;

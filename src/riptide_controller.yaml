@@ -45,3 +45,8 @@ riptide_controller:
     default_value: .05,
     description: "Specifies the typical range of action of fins",
   }
+  w_limit: {
+    type: double,
+    default_value: .4,
+    description: "Specifies the command limits",
+  }

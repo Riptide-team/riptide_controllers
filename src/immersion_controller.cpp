@@ -128,6 +128,11 @@ namespace riptide_controllers {
     }
 
     controller_interface::return_type ImmersionController::update(const rclcpp::Time & time, const rclcpp::Duration & /*period*/) {
+        if (param_listener_->is_old(params_)) {
+            param_listener_->refresh_dynamic_parameters();
+            params_ = param_listener_->get_params();
+        }
+            
         std::scoped_lock lock(goal_mutex_);
 
         if (goal_handle_ != nullptr) {

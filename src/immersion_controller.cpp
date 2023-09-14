@@ -177,20 +177,30 @@ namespace riptide_controllers {
                     command_interfaces_[0].set_value(params_.thruster_velocity);
                     command_interfaces_[1].set_value(0.);
 
-                    double angle = params_.fin_angle * (1 - std::exp(- std::pow((time_since_immersion - *phase_1_duration_).seconds() / phase_2_duration_->seconds(), 2)));
+                    double angle = params_.fin_angle * std::exp(- std::pow(((time_since_immersion - *phase_1_duration_).seconds() - phase_2_duration_->seconds() / 2) / (phase_2_duration_->seconds() / 4), 2));
                     command_interfaces_[2].set_value(-angle);
                     command_interfaces_[3].set_value(angle);
                 }
 
-                // Phase 3
-                else if (time_since_immersion < *phase_1_duration_ + *phase_2_duration_ + *phase_3_duration_) {
-                    command_interfaces_[0].set_value(params_.thruster_velocity);
-                    command_interfaces_[1].set_value(0.);
+                // // Phase 2
+                // else if (time_since_immersion < *phase_1_duration_ + *phase_2_duration_) {
+                //     command_interfaces_[0].set_value(params_.thruster_velocity);
+                //     command_interfaces_[1].set_value(0.);
 
-                    double angle = params_.fin_angle * 2 * (std::exp(- std::pow(2 * (time_since_immersion - *phase_1_duration_ - *phase_2_duration_).seconds() / phase_3_duration_->seconds(), 2)) - 0.5);
-                    command_interfaces_[2].set_value(-angle);
-                    command_interfaces_[3].set_value(angle);
-                }
+                //     double angle = params_.fin_angle * (1 - std::exp(- std::pow((time_since_immersion - *phase_1_duration_).seconds() / phase_2_duration_->seconds(), 2)));
+                //     command_interfaces_[2].set_value(-angle);
+                //     command_interfaces_[3].set_value(angle);
+                // }
+
+                // // Phase 3
+                // else if (time_since_immersion < *phase_1_duration_ + *phase_2_duration_ + *phase_3_duration_) {
+                //     command_interfaces_[0].set_value(params_.thruster_velocity);
+                //     command_interfaces_[1].set_value(0.);
+
+                //     double angle = params_.fin_angle * 2 * (std::exp(- std::pow(2 * (time_since_immersion - *phase_1_duration_ - *phase_2_duration_).seconds() / phase_3_duration_->seconds(), 2)) - 0.5);
+                //     command_interfaces_[2].set_value(-angle);
+                //     command_interfaces_[3].set_value(angle);
+                // }
 
                 else {
                     // Publishing result

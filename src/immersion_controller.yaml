@@ -49,3 +49,8 @@ immersion_controller:
     description: "Specifies the fin angle to be applied on each phases",
     default_value: 0.4
   }
+  roll_compensation_angle: {
+    type: double,
+    description: "Specifies the roll compensation angle",
+    default_value: 0.1
+  }

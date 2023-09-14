@@ -133,6 +133,9 @@ namespace riptide_controllers {
         if (param_listener_->is_old(params_)) {
             param_listener_->refresh_dynamic_parameters();
             params_ = param_listener_->get_params();
+
+            phase_1_duration_ = std::make_unique<rclcpp::Duration>(std::chrono::nanoseconds(static_cast<std::int64_t>(params_.phase_1_duration * 1e9)));
+            phase_2_duration_ = std::make_unique<rclcpp::Duration>(std::chrono::nanoseconds(static_cast<std::int64_t>(params_.phase_2_duration * 1e9)));
         }
 
         if (goal_handle_ != nullptr) {
@@ -168,8 +171,8 @@ namespace riptide_controllers {
                     // Publishing null commands
                     command_interfaces_[0].set_value(params_.thruster_velocity);
                     command_interfaces_[1].set_value(0.);
-                    command_interfaces_[2].set_value(0.);
-                    command_interfaces_[3].set_value(0.);
+                    command_interfaces_[2].set_value(params_.thruster_velocity);
+                    command_interfaces_[3].set_value(params_.thruster_velocity);
                 }
 
                 // Phase 2
@@ -179,8 +182,8 @@ namespace riptide_controllers {
 
                     double t = (time_since_immersion - *phase_1_duration_).seconds();
                     double angle = - params_.fin_angle * (t - phase_2_duration_->seconds()/2) * std::exp(- std::pow((t - phase_2_duration_->seconds()/2), 2) / (phase_2_duration_->seconds()/2));
-                    command_interfaces_[2].set_value(-angle);
-                    command_interfaces_[3].set_value(angle);
+                    command_interfaces_[2].set_value(angle);
+                    command_interfaces_[3].set_value(-angle);
                 }
 
                 else {

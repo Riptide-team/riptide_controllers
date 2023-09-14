@@ -37,7 +37,6 @@ immersion_controller:
   phase_3_duration: {
     type: double,
     description: "Specifies the duration of phase 3 in seconds",
-    read_only: true,
     default_value: 3.
   }
   thruster_velocity: {

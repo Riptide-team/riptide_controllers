@@ -60,9 +60,6 @@ namespace riptide_controllers {
             // Goal handle
             std::shared_ptr<GoalHandle> goal_handle_;
 
-            // Current time
-            rclcpp::Time current_time_;
-
             // Immersion start time
             rclcpp::Time immersion_start_time_;
 
@@ -71,6 +68,9 @@ namespace riptide_controllers {
 
             // Phase 2 duration
             std::unique_ptr<rclcpp::Duration> phase_2_duration_;
+
+            // Phase 2 duration
+            std::unique_ptr<rclcpp::Duration> phase_3_duration_;
     };
 
 } // riptide_controllers

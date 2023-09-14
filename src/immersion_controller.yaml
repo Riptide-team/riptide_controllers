@@ -28,13 +28,19 @@ immersion_controller:
     type: double,
     description: "Specifies the duration of phase 1 in seconds",
     read_only: true,
-    default_value: 3.
+    default_value: 5.
   }
   phase_2_duration: {
     type: double,
     description: "Specifies the duration of phase 2 in seconds",
     read_only: true,
-    default_value: 2.
+    default_value: 5.
+  }
+  phase_3_duration: {
+    type: double,
+    description: "Specifies the duration of phase 3 in seconds",
+    read_only: true,
+    default_value: 3.
   }
   thruster_velocity: {
     type: double,
@@ -46,5 +52,5 @@ immersion_controller:
     type: double,
     description: "Specifies the fin angle to be applied on each phases",
     read_only: true,
-    default_value: 0.5
+    default_value: 0.4
   }

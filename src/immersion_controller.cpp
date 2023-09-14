@@ -177,7 +177,9 @@ namespace riptide_controllers {
                     command_interfaces_[0].set_value(params_.thruster_velocity);
                     command_interfaces_[1].set_value(0.);
 
-                    double angle = params_.fin_angle * std::exp(- std::pow(((time_since_immersion - *phase_1_duration_).seconds() - phase_2_duration_->seconds() / 2) / (phase_2_duration_->seconds() / 4), 2));
+                    // double angle = params_.fin_angle * std::exp(- std::pow(((time_since_immersion - *phase_1_duration_).seconds() - phase_2_duration_->seconds() / 2) / (phase_2_duration_->seconds() / 4), 2));
+                    double t = (time_since_immersion - *phase_1_duration_).seconds();
+                    double angle = - params_.fin_angle * (t - phase_2_duration_->seconds()/2) * std::exp(- std::pow((t - phase_2_duration_->seconds()/2) / 2, 2) / phase_2_duration_->seconds()/2);
                     command_interfaces_[2].set_value(-angle);
                     command_interfaces_[3].set_value(angle);
                 }

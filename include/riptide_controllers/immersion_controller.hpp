@@ -71,6 +71,9 @@ namespace riptide_controllers {
 
             // Phase 2 duration
             std::unique_ptr<rclcpp::Duration> phase_3_duration_;
+
+            // Handle flag
+            double handle_flag = false;
     };
 
 } // riptide_controllers

@@ -130,6 +130,7 @@ namespace riptide_controllers {
     controller_interface::return_type ImmersionController::update(const rclcpp::Time & time, const rclcpp::Duration & /*period*/) {
         std::scoped_lock lock(goal_mutex_);
 
+        // Check for new params
         if (param_listener_->is_old(params_)) {
             param_listener_->refresh_dynamic_parameters();
             params_ = param_listener_->get_params();
@@ -138,6 +139,13 @@ namespace riptide_controllers {
             phase_2_duration_ = std::make_unique<rclcpp::Duration>(std::chrono::nanoseconds(static_cast<std::int64_t>(params_.phase_2_duration * 1e9)));
         }
 
+        // Check handle flag
+        if (handle_flag) {
+            immersion_start_time_ = time;
+            handle_flag = false;
+        }
+
+        // Goal handle
         if (goal_handle_ != nullptr) {
 
             // Check if the goal is canceled
@@ -151,8 +159,8 @@ namespace riptide_controllers {
                 // Publishing null commands
                 command_interfaces_[0].set_value(0.);
                 command_interfaces_[1].set_value(0.);
-                command_interfaces_[2].set_value(-params_.roll_compensation_angle);
-                command_interfaces_[3].set_value(params_.roll_compensation_angle);
+                command_interfaces_[2].set_value(0.);
+                command_interfaces_[3].set_value(0.);
 
                 return controller_interface::return_type::OK;
             }
@@ -163,29 +171,19 @@ namespace riptide_controllers {
 
                 // Publish feedback
                 auto feedback = std::make_shared<Action::Feedback>();
-                feedback->remaining_time = std::max(rclcpp::Duration(0, 0), *phase_1_duration_ + *phase_2_duration_ - time_since_immersion);
+                feedback->remaining_time = std::max(rclcpp::Duration(0, 0), rclcpp::Duration(8, 0) - time_since_immersion);
                 goal_handle_->publish_feedback(feedback);
-                
-                // Phase 1
-                if (time_since_immersion < *phase_1_duration_) {
-                    // Publishing null commands
-                    command_interfaces_[0].set_value(params_.thruster_velocity);
-                    command_interfaces_[1].set_value(0.);
-                    command_interfaces_[2].set_value(params_.thruster_velocity);
-                    command_interfaces_[3].set_value(params_.thruster_velocity);
-                }
 
-                // Phase 2
-                else if (time_since_immersion < *phase_1_duration_ + *phase_2_duration_) {
-                    command_interfaces_[0].set_value(params_.thruster_velocity);
-                    command_interfaces_[1].set_value(0.);
+                if (time_since_immersion < 8) {
+                    double thrust = thrust_command(time_since_immersion.seconds());
+                    double angle = fin_command(time_since_immersion.seconds());
 
-                    double t = (time_since_immersion - *phase_1_duration_).seconds();
-                    double angle = - params_.fin_angle * (t - phase_2_duration_->seconds()/2) * std::exp(- std::pow((t - phase_2_duration_->seconds()/2), 2) / (phase_2_duration_->seconds()/2));
+                    command_interfaces_[0].set_value(thrust);
+                    command_interfaces_[1].set_value(0.);
                     command_interfaces_[2].set_value(- angle - params_.roll_compensation_angle);
                     command_interfaces_[3].set_value(angle + params_.roll_compensation_angle);
                 }
-
+                
                 else {
                     // Publishing result
                     auto result = std::make_shared<Action::Result>();
@@ -231,7 +229,16 @@ namespace riptide_controllers {
         RCLCPP_INFO(get_node()->get_logger(), "Handle accepted");
         std::scoped_lock lock(goal_mutex_);
         goal_handle_ = goal_handle;
-        immersion_start_time_ = get_node()->get_clock()->now();
+        // immersion_start_time_ = get_node()->get_clock()->now();
+        double handle_flag = true;
+    }
+
+    double ImmersionController::fin_command(double t) {
+        return params_.fin_angle * std::exp(- std::pow(t - 3, 2) / 2) - 0.5 * std::exp(- std::pow(t - 6, 2) / 2);
+    }
+
+    double ImmersionController::thrust_command(double t) {
+        return params_.thruster_velocity * (1 - 1 / (1 + std::exp(- 3*(t - 4))));
     }
     
 } // riptide_controllers

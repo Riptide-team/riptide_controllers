@@ -140,7 +140,7 @@ namespace riptide_controllers {
         }
 
         // Check handle flag
-        if (handle_flag) {
+        if (handle_flag_) {
             immersion_start_time_ = time;
             handle_flag = false;
         }
@@ -174,7 +174,7 @@ namespace riptide_controllers {
                 feedback->remaining_time = std::max(rclcpp::Duration(0, 0), rclcpp::Duration(8, 0) - time_since_immersion);
                 goal_handle_->publish_feedback(feedback);
 
-                if (time_since_immersion < 8) {
+                if (time_since_immersion.seconds() < 8) {
                     double thrust = thrust_command(time_since_immersion.seconds());
                     double angle = fin_command(time_since_immersion.seconds());
 
@@ -183,7 +183,7 @@ namespace riptide_controllers {
                     command_interfaces_[2].set_value(- angle - params_.roll_compensation_angle);
                     command_interfaces_[3].set_value(angle + params_.roll_compensation_angle);
                 }
-                
+
                 else {
                     // Publishing result
                     auto result = std::make_shared<Action::Result>();
@@ -230,7 +230,7 @@ namespace riptide_controllers {
         std::scoped_lock lock(goal_mutex_);
         goal_handle_ = goal_handle;
         // immersion_start_time_ = get_node()->get_clock()->now();
-        double handle_flag = true;
+        handle_flag_ = true;
     }
 
     double ImmersionController::fin_command(double t) {

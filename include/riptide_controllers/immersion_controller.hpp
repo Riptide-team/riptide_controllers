@@ -73,7 +73,10 @@ namespace riptide_controllers {
             std::unique_ptr<rclcpp::Duration> phase_3_duration_;
 
             // Handle flag
-            double handle_flag = false;
+            double handle_flag_ = false;
+
+            double thrust_command(double t);
+            double fin_command(double t);
     };
 
 } // riptide_controllers

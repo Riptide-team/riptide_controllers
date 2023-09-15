@@ -142,7 +142,7 @@ namespace riptide_controllers {
         // Check handle flag
         if (handle_flag_) {
             immersion_start_time_ = time;
-            handle_flag = false;
+            handle_flag_ = false;
         }
 
         // Goal handle

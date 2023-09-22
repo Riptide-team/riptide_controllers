@@ -1,0 +1,62 @@
+dolphin_controller:
+  prefix: {
+    type: string,
+    description: "Specifies the prefix of the controller",
+    read_only: true,
+    default_value: ""
+  }
+  pressure_name: {
+    type: string,
+    description: "Specifies the pressure sensor name which will be claimed by the controller",
+    read_only: true
+  }
+  imu_name: {
+    type: string,
+    description: "Specifies the imu name which will be claimed by the controller",
+    read_only: true
+  }
+  orientation_reference_joint : {
+    type: string,
+    description: "Specifies the joint name which will be used as reference for the orientation",
+    read_only: true
+  }
+  K: {
+    type: double,
+    default_value: 0.52,
+    description: "Specifies the max pitch when the depth error is infinite",
+  }
+  r: {
+    type: double,
+    default_value: 1.,
+    description: "Specifies the regulation corridor for acceptable depth error",
+  }
+  roll : {
+    type: double,
+    default_value: 0.,
+    description: "Specifies the desired roll angle",
+  }
+  pitch : {
+    type: double,
+    default_value: 1.3.,
+    description: "Specifies the desired pitch angle",
+  }
+  yaw : {
+    type: double,
+    default_value: 0.,
+    description: "Specifies the desired yaw angle",
+  }
+  thruster_velocity : {
+    type: double,
+    default_value: 1,
+    description: "Specifies the desired truster velocity",
+  }
+  depth_reference : {
+    type: double,
+    default_value: 0.3,
+    description: "Specifies the desired depth to reach before stopping every command",
+  }
+  timeout: {
+    type: double,
+    default_value: 10.,
+    description: "Specifies the timeout for the controller",
+  }

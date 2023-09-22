@@ -77,6 +77,10 @@ namespace riptide_controllers {
 
             double thrust_command(double t);
             double fin_command(double t);
+
+            // Controller state publisher
+            rclcpp::Publisher<ControllerStateType>::SharedPtr controller_state_publisher_;
+            std::unique_ptr<realtime_tools::RealtimePublisher<ControllerStateType>> rt_controller_state_publisher_;
     };
 
 } // riptide_controllers

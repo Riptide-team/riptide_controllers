@@ -73,6 +73,10 @@ namespace riptide_controllers {
             std::bind(&ImmersionController::handle_accepted, this, std::placeholders::_1)
         );
 
+        // Configuring controller state publisher
+        controller_state_publisher_ = get_node()->create_publisher<ControllerStateType>("~/controller_state", rclcpp::SystemDefaultsQoS());
+        rt_controller_state_publisher_ = std::make_unique<realtime_tools::RealtimePublisher<ControllerStateType>>(controller_state_publisher_);
+
         RCLCPP_DEBUG(get_node()->get_logger(), "configure successful");
         return CallbackReturn::SUCCESS;
     }
@@ -162,6 +166,16 @@ namespace riptide_controllers {
                 command_interfaces_[2].set_value(0.);
                 command_interfaces_[3].set_value(0.);
 
+                // Publishing controller state
+                rt_controller_state_publisher_->lock();
+                rt_controller_state_publisher_->msg_.header.stamp = time;
+                rt_controller_state_publisher_->msg_.remaining_time = rclcpp::Duration(0, 0);
+                rt_controller_state_publisher_->msg_.thruster_velocity = 0;
+                rt_controller_state_publisher_->msg_.fin_angles.x = 0;
+                rt_controller_state_publisher_->msg_.fin_angles.y = 0;
+                rt_controller_state_publisher_->msg_.fin_angles.z = 0;
+                rt_controller_state_publisher_->unlockAndPublish();
+
                 return controller_interface::return_type::OK;
             }
 
@@ -182,6 +196,15 @@ namespace riptide_controllers {
                     command_interfaces_[1].set_value(0.);
                     command_interfaces_[2].set_value(- angle - params_.roll_compensation_angle);
                     command_interfaces_[3].set_value(angle + params_.roll_compensation_angle);
+
+                    rt_controller_state_publisher_->lock();
+                    rt_controller_state_publisher_->msg_.header.stamp = time;
+                    rt_controller_state_publisher_->msg_.remaining_time = std::max(rclcpp::Duration(0, 0), rclcpp::Duration(8, 0) - time_since_immersion);
+                    rt_controller_state_publisher_->msg_.thruster_velocity = thrust;
+                    rt_controller_state_publisher_->msg_.fin_angles.x = 0;
+                    rt_controller_state_publisher_->msg_.fin_angles.y = - angle - params_.roll_compensation_angle;
+                    rt_controller_state_publisher_->msg_.fin_angles.z = angle + params_.roll_compensation_angle;
+                    rt_controller_state_publisher_->unlockAndPublish();
                 }
 
                 else {
@@ -195,6 +218,15 @@ namespace riptide_controllers {
                     command_interfaces_[1].set_value(0.);
                     command_interfaces_[2].set_value(0.);
                     command_interfaces_[3].set_value(0.);
+
+                    rt_controller_state_publisher_->lock();
+                    rt_controller_state_publisher_->msg_.header.stamp = time;
+                    rt_controller_state_publisher_->msg_.remaining_time = rclcpp::Duration(0, 0);
+                    rt_controller_state_publisher_->msg_.thruster_velocity = 0;
+                    rt_controller_state_publisher_->msg_.fin_angles.x = 0;
+                    rt_controller_state_publisher_->msg_.fin_angles.y = 0;
+                    rt_controller_state_publisher_->msg_.fin_angles.z = 0;
+                    rt_controller_state_publisher_->unlockAndPublish();
                 }
 
                 return controller_interface::return_type::OK;

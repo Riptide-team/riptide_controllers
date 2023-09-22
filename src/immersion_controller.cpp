@@ -238,7 +238,7 @@ namespace riptide_controllers {
     }
 
     double ImmersionController::thrust_command(double t) {
-        return params_.thruster_velocity * (1 - 1 / (1 + std::exp(- 3*(t - 4))));
+        return params_.thruster_velocity * (1 - 1 / (1 + std::exp(- 3*(t - 4))) + 1 / (1 + std::exp(- 3 * (t - 6))));
     }
     
 } // riptide_controllers

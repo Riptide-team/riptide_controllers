@@ -46,6 +46,7 @@ namespace riptide_controllers {
             depth_controller::Params params_;
 
             // Starting time
+            bool set_start_time_ = false;
             rclcpp::Time action_start_time_;
 
             // Depth mutex

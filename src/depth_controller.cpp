@@ -131,9 +131,13 @@ namespace riptide_controllers {
     controller_interface::return_type DepthController::update(const rclcpp::Time & time, const rclcpp::Duration & /*period*/) {
         std::lock_guard<std::mutex> lock_(goal_mutex_);
 
-        // TODO find a fix here
-        // RCLCPP_INFO(get_node()->get_logger(), "time %d", time.get_clock_type());
-        // RCLCPP_INFO(get_node()->get_logger(), "action_start_time_ %d", action_start_time_.get_clock_type());
+        // Setting start_time_ if not set
+        if (!set_start_time_) {
+            action_start_time_ = time;
+            set_start_time_ = true;
+        }
+
+        // Computing time since start_time
         rclcpp::Duration timer = time - action_start_time_;
 
         // Checking if the goal_handle is not nullptr
@@ -177,7 +181,7 @@ namespace riptide_controllers {
             if (goal_handle_->is_executing()) {
 
                 // Check if the timeout is expired -> if so, succeed the goal
-                if (timer > goal_handle_->get_goal()->timeout) {
+                if (timer >= goal_handle_->get_goal()->timeout) {
 
                     RCLCPP_INFO(get_node()->get_logger(), "Action finished");
 
@@ -211,13 +215,12 @@ namespace riptide_controllers {
                 }
 
                 else {
-                    // Computing depth error (positive value is go downwards, positive value is go upwards)
+                    // Computing depth error (positive value is going downwards, negative value is going upwards)
                     double depth_error = goal_handle_->get_goal()->depth - state_interfaces_[0].get_value();
 
                     // Computing wanted pitch (- comes from orientation convention, positive error -> going down, negative error -> going up)
-                    // double wanted_pitch = - params_.K * std::atan(depth_error / params_.r);
-
-                    double wanted_pitch = - params_.K * std::pow(std::tanh(depth_error / params_.r), 3);
+                    double wanted_pitch = - params_.K * std::atan(depth_error / params_.r);
+                    // double wanted_pitch = - params_.K * std::pow(std::tanh(depth_error / params_.r), 3);
 
                     // Building wanted command orientation from euler angles
                     Eigen::AngleAxisd yawAngle(params_.yaw, Eigen::Vector3d::UnitZ());
@@ -315,11 +318,9 @@ namespace riptide_controllers {
         // Saving goal handle
         std::lock_guard<std::mutex> lock_(goal_mutex_);
         goal_handle_ = goal_handle;
-        rclcpp::Time current_time = get_node()->get_clock()->now();
-        RCLCPP_INFO(get_node()->get_logger(), "Current time clock type %d", current_time.get_clock_type());
 
-        action_start_time_ = rclcpp::Time(current_time, rcl_clock_type_t::RCL_ROS_TIME);
-        RCLCPP_INFO(get_node()->get_logger(), "action_start_time_ clock type %d", action_start_time_.get_clock_type());
+        // Starting at the next iteration
+        set_start_time_ = false;
     }
 
 } // riptide_controllers

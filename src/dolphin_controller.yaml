@@ -20,16 +20,6 @@ dolphin_controller:
     description: "Specifies the joint name which will be used as reference for the orientation",
     read_only: true
   }
-  K: {
-    type: double,
-    default_value: 0.52,
-    description: "Specifies the max pitch when the depth error is infinite",
-  }
-  r: {
-    type: double,
-    default_value: 1.,
-    description: "Specifies the regulation corridor for acceptable depth error",
-  }
   roll : {
     type: double,
     default_value: 0.,
@@ -37,7 +27,7 @@ dolphin_controller:
   }
   pitch : {
     type: double,
-    default_value: 1.3.,
+    default_value: 1.3,
     description: "Specifies the desired pitch angle",
   }
   yaw : {
@@ -47,7 +37,7 @@ dolphin_controller:
   }
   thruster_velocity : {
     type: double,
-    default_value: 1,
+    default_value: 1.,
     description: "Specifies the desired truster velocity",
   }
   depth_reference : {

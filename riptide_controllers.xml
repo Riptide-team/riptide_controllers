@@ -19,6 +19,11 @@
             Riptide log controller
         </description>
     </class>
+    <class name="riptide_controllers/DolphinController" type="riptide_controllers::DolphinController" base_class_type="controller_interface::ControllerInterface">
+        <description>
+            Riptide full depth controller
+        </description>
+    </class>
     <class name="riptide_controllers/FullDepthController" type="riptide_controllers::FullDepthController" base_class_type="controller_interface::ControllerInterface">
         <description>
             Riptide full depth controller

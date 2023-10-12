@@ -9,6 +9,7 @@
 #include "rclcpp/duration.hpp"
 
 #include "realtime_tools/realtime_buffer.h"
+#include "eigen3/Eigen/Dense"
 
 #include <chrono>
 #include <cmath>
@@ -50,6 +51,8 @@ namespace riptide_controllers {
         // Configuring controller state publisher
         controller_state_publisher_ = get_node()->create_publisher<ControllerStateType>("~/controller_state", rclcpp::SystemDefaultsQoS());
         rt_controller_state_publisher_ = std::make_unique<realtime_tools::RealtimePublisher<ControllerStateType>>(controller_state_publisher_);
+
+        return CallbackReturn::SUCCESS;
     }
 
     controller_interface::InterfaceConfiguration DolphinController::command_interface_configuration() const {
@@ -95,8 +98,6 @@ namespace riptide_controllers {
     }
 
     controller_interface::CallbackReturn DolphinController::on_activate(const rclcpp_lifecycle::State & /*previous_state*/) {
-        goal_handle_ = nullptr;
-
         // Setting null commands
         command_interfaces_[0].set_value(0.);
         command_interfaces_[1].set_value(0.);
@@ -109,8 +110,6 @@ namespace riptide_controllers {
     }
 
     controller_interface::CallbackReturn DolphinController::on_deactivate(const rclcpp_lifecycle::State & /*previous_state*/) {
-        goal_handle_ = nullptr;
-
         // Setting quiet_nan commands
         command_interfaces_[0].set_value(std::numeric_limits<double>::quiet_NaN());
         command_interfaces_[1].set_value(std::numeric_limits<double>::quiet_NaN());
@@ -134,7 +133,7 @@ namespace riptide_controllers {
         if (remaining_time > rclcpp::Duration::from_seconds(0)) {
             // Building wanted command orientation from euler angles
             Eigen::AngleAxisd yawAngle(params_.yaw, Eigen::Vector3d::UnitZ());
-            Eigen::AngleAxisd pitchAngle(params_pitch, Eigen::Vector3d::UnitY());
+            Eigen::AngleAxisd pitchAngle(params_.pitch, Eigen::Vector3d::UnitY());
             Eigen::AngleAxisd rollAngle(params_.roll, Eigen::Vector3d::UnitX());
             Eigen::Quaternion<double> q = yawAngle * pitchAngle * rollAngle;
 
@@ -172,11 +171,11 @@ namespace riptide_controllers {
         rt_controller_state_publisher_->msg_.depth_error = params_.depth_reference - state_interfaces_[0].get_value();
         
         // Output
-        rt_controller_state_publisher_->msg_.velocity_output = command_interfaces_[0];
-        rt_controller_state_publisher_->msg_.orientation_output.x = command_interfaces_[1];
-        rt_controller_state_publisher_->msg_.orientation_output.y = command_interfaces_[2];
-        rt_controller_state_publisher_->msg_.orientation_output.z = command_interfaces_[3];
-        rt_controller_state_publisher_->msg_.orientation_output.w = command_interfaces_[4];
+        rt_controller_state_publisher_->msg_.velocity_output = command_interfaces_[0].get_value();
+        rt_controller_state_publisher_->msg_.orientation_output.x = command_interfaces_[1].get_value();
+        rt_controller_state_publisher_->msg_.orientation_output.y = command_interfaces_[2].get_value();
+        rt_controller_state_publisher_->msg_.orientation_output.z = command_interfaces_[3].get_value();
+        rt_controller_state_publisher_->msg_.orientation_output.w = command_interfaces_[4].get_value();
 
         // Publishing controller state
         rt_controller_state_publisher_->unlockAndPublish();

@@ -7,7 +7,7 @@
 #include <riptide_msgs/action/immerse.hpp>
 
 #include <realtime_tools/realtime_publisher.h>
-#include <riptide_msgs/msg/immersion_controller_state.hpp>
+#include <riptide_msgs/msg/dolphin_controller_state.hpp>
 
 
 namespace riptide_controllers {

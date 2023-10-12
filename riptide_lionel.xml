@@ -1,0 +1,12 @@
+<library path="riptide_lionel">
+    <class name="riptide_lionel/ControlSurface" type="riptide_lionel::ControlSurface" base_class_type="controller_interface::ControllerInterface">
+        <description>
+            Riptide control surface actuation model
+        </description>
+    </class>
+    <class name="riptide_lionel/RiptideDispatcher" type="riptide_lionel::RiptideDispatcher" base_class_type="controller_interface::ControllerInterface">
+        <description>
+            Riptide wrench dispatcher over actuators
+        </description>
+    </class>
+</library>

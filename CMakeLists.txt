@@ -70,11 +70,23 @@ ament_target_dependencies(${PROJECT_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 pluginlib_export_plugin_description_file(controller_interface riptide_controllers.xml)
 
+# Lionel's library
+generate_parameter_library(control_surface_parameters src/control_surface.yaml)
+generate_parameter_library(riptide_dispatcher_parameters src/riptide_dispatcher.yaml)
+
+add_library(riptide_lionel SHARED src/control_surface.cpp)
+target_include_directories(riptide_lionel PRIVATE include)
+target_link_libraries(riptide_lionel control_surface_parameters riptide_dispatcher_parameters Eigen3::Eigen)
+ament_target_dependencies(riptide_lionel ${THIS_PACKAGE_INCLUDE_DEPENDS})
+
+pluginlib_export_plugin_description_file(controller_interface riptide_lionel.xml)
+
+# Install
 install(DIRECTORY include/ DESTINATION include)
 
 install(
   TARGETS
-  ${PROJECT_NAME}
+  ${PROJECT_NAME} riptide_lionel
   RUNTIME DESTINATION bin
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

@@ -35,3 +35,13 @@ log_controller:
     default_value: .5,
     read_only: true
   }
+  kp: {
+    type: double_array,
+    description: "Specifies the Jp gain",
+    default_value: [1., 1., 1.],
+  }
+  kd: {
+    type: double_array,
+    description: "Specifies the Jp gain",
+    default_value: [.1, .1, .1],
+  }

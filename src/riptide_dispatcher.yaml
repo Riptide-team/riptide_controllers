@@ -1,0 +1,32 @@
+riptide_dispatcher:
+  s: {
+    type: double,
+    description: "Specifies the surface area.",
+  }
+  rho: {
+    type: double,
+    description: "Specifies the fluid density.",
+    default_value: 1000.
+  }
+  cla: {
+    type: double,
+    description: "Specifies the lift slope as a function of incidence angle.",
+    default_value: 1.0
+  }
+  alpha_stall: {
+    type: double,
+    description: "Specifies the stall angle.",
+    default_value: 0.2
+  }
+  joint_name: {
+    type: string_array,
+    default_value: [],
+    description: "Name of the controlled joint",
+    read_only: true,
+  }
+  interface_name: {
+    type: string_array,
+    default_value: [],
+    description: "Name of the interface to command",
+    read_only: true,
+  }

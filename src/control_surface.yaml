@@ -1,0 +1,35 @@
+control_surface:
+  prefix: {
+    type: string,
+    description: "Specifies the prefix of the robot",
+    read_only: true
+  }
+  s: {
+    type: double,
+    description: "Specifies the surface area.",
+  }
+  rho: {
+    type: double,
+    description: "Specifies the fluid density.",
+    default_value: 1000.
+  }
+  cla: {
+    type: double,
+    description: "Specifies the lift slope as a function of incidence angle.",
+    default_value: 1.0
+  }
+  alpha_stall: {
+    type: double,
+    description: "Specifies the stall angle.",
+    default_value: 0.2
+  }
+  joint_name: {
+    type: string,
+    description: "Name of the controlled joint",
+    read_only: true
+  }
+  interface_name: {
+    type: string,
+    description: "Name of the interface to command",
+    default_value: "position"
+  }

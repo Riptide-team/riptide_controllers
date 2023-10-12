@@ -62,10 +62,11 @@ generate_parameter_library(riptide_controller_parameters src/riptide_controller.
 generate_parameter_library(immersion_controller_parameters src/immersion_controller.yaml)
 generate_parameter_library(log_controller_parameters src/log_controller.yaml)
 generate_parameter_library(depth_controller_parameters src/depth_controller.yaml)
+generate_parameter_library(dolphin_controller_parameters src/dolphin_controller.yaml)
 
-add_library(${PROJECT_NAME} SHARED src/riptide_controller.cpp src/immersion_controller.cpp src/log_controller.cpp src/depth_controller.cpp)
+add_library(${PROJECT_NAME} SHARED src/riptide_controller.cpp src/immersion_controller.cpp src/log_controller.cpp src/depth_controller.cpp src/dolphin_controller.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE include)
-target_link_libraries(${PROJECT_NAME} riptide_controller_parameters immersion_controller_parameters log_controller_parameters depth_controller_parameters Eigen3::Eigen)
+target_link_libraries(${PROJECT_NAME} riptide_controller_parameters immersion_controller_parameters log_controller_parameters depth_controller_parameters dolphin_controller_parameters Eigen3::Eigen)
 ament_target_dependencies(${PROJECT_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 pluginlib_export_plugin_description_file(controller_interface riptide_controllers.xml)

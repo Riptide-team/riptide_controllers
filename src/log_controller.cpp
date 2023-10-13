@@ -59,7 +59,7 @@ namespace riptide_controllers {
         }
 
         // Resizing reference_interfaces to 5 -> one linear velocity, 4 orientation quaternion
-        reference_interfaces_.resize(8, std::numeric_limits<double>::quiet_NaN());
+        reference_interfaces_.resize(5, std::numeric_limits<double>::quiet_NaN());
 
         // Configuring controller state publisher
         controller_state_publisher_ = get_node()->create_publisher<ControllerStateType>("~/controller_state", rclcpp::SystemDefaultsQoS());
@@ -109,6 +109,11 @@ namespace riptide_controllers {
         for (const auto &c: coords) {
             state_interfaces_config.names.push_back(prefix + params_.imu_name + "/orientation." + c);
         }
+
+        coords = {"x", "y", "z"};
+        for (const auto &c: coords) {
+            state_interfaces_config.names.push_back(prefix + params_.imu_name + "/angular_velocity." + c);
+        }
         return state_interfaces_config;
     }
 
@@ -119,9 +124,6 @@ namespace riptide_controllers {
         reference_interfaces.push_back(hardware_interface::CommandInterface(get_node()->get_name(), "orientation.y", &reference_interfaces_[2]));
         reference_interfaces.push_back(hardware_interface::CommandInterface(get_node()->get_name(), "orientation.z", &reference_interfaces_[3]));
         reference_interfaces.push_back(hardware_interface::CommandInterface(get_node()->get_name(), "orientation.w", &reference_interfaces_[4]));
-        reference_interfaces.push_back(hardware_interface::CommandInterface(get_node()->get_name(), "angular_velocity.x", &reference_interfaces_[5]));
-        reference_interfaces.push_back(hardware_interface::CommandInterface(get_node()->get_name(), "angular_velocity.y", &reference_interfaces_[6]));
-        reference_interfaces.push_back(hardware_interface::CommandInterface(get_node()->get_name(), "angular_velocity.z", &reference_interfaces_[7]));
         return reference_interfaces;
     }
 
@@ -209,9 +211,9 @@ namespace riptide_controllers {
 
         // Setting the command
         command_interfaces_[0].set_value(reference_interfaces_[0]);
-        command_interfaces_[1].set_value(params_.kp[0] * w(0) + params_.kd[0] * state_interfaces_[5].get_value());
-        command_interfaces_[2].set_value(params_.kp[1] * w(1) + params_.kd[1] * state_interfaces_[6].get_value());
-        command_interfaces_[3].set_value(params_.kp[2] * w(2) + params_.kd[2] * state_interfaces_[7].get_value());
+        command_interfaces_[1].set_value(params_.kp[0] * w(0) + params_.kd[0] * state_interfaces_[4].get_value());
+        command_interfaces_[2].set_value(params_.kp[1] * w(1) + params_.kd[1] * state_interfaces_[5].get_value());
+        command_interfaces_[3].set_value(params_.kp[2] * w(2) + params_.kd[2] * state_interfaces_[6].get_value());
 
         RCLCPP_DEBUG(get_node()->get_logger(), "Publishing %f %f %f %f", state_interfaces_[0].get_value(), w(0), w(1), w(2));
 

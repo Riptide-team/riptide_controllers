@@ -59,7 +59,7 @@ namespace riptide_controllers {
         }
 
         // Resizing reference_interfaces to 5 -> one linear velocity, 4 orientation quaternion
-        reference_interfaces_.resize(5, std::numeric_limits<double>::quiet_NaN());
+        reference_interfaces_.resize(8, std::numeric_limits<double>::quiet_NaN());
 
         // Configuring controller state publisher
         controller_state_publisher_ = get_node()->create_publisher<ControllerStateType>("~/controller_state", rclcpp::SystemDefaultsQoS());
